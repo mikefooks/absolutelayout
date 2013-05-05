@@ -166,14 +166,17 @@ define(['jquery'], function($) {
     // Repositions a cell and updates internal properties.
 
     Cell.prototype.reposition = function(newPosition) {
-        var occupiedPlot;
-
-        console.log(this.occupiedPlots);
+        var that = this,
+            occupiedPlot;
 
         this.cellInfo = {
             loc: newPosition,
             dim: this.cellInfo.dim
         };
+
+        this.occupiedPlots.forEach(function(prop) {
+            that.layout.Plots[prop].occupied = false;
+        });
 
         this.occupiedPlots = [];
 
@@ -183,6 +186,10 @@ define(['jquery'], function($) {
                 this.occupiedPlots.push(occupiedPlot);
             }
         }
+
+        this.occupiedPlots.forEach(function(prop) {
+            that.layout.Plots[prop].occupied = true;
+        });
 
         this.positionPlot = this.layout.Plots[newPosition[0] + '-' + newPosition[1]];
 
