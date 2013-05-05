@@ -2,9 +2,6 @@ define(['jquery'], function($) {
 
     "use strict";
 
-    // Constructor for single cell object. Rendering a cell
-    // appends it to the DOM.
-
     var Layout = function(config) {
         this.config = {
             fluid: config.fluid,
@@ -56,6 +53,8 @@ define(['jquery'], function($) {
             occupiedPlots.forEach(function(obj, idx) {
                 that.Plots[obj].occupied = true;
             });
+
+            newCell.occupiedPlots = occupiedPlots;
 
             newCell.render();
 
@@ -128,6 +127,7 @@ define(['jquery'], function($) {
 
     // Cell is an actual element meant for appending to the DOM, it occupies a point on the
     // layout determined by its associated position Plot.
+
     var Cell = function(params, layout) {
         var that = this,
             topLeft = params.topLeft,
@@ -143,10 +143,6 @@ define(['jquery'], function($) {
         this.cellInfo = {
             loc: topLeft,
             dim: dimensionsIn
-        };
-        this.boundingPlots = {
-            topLeft: [topLeft[0], topLeft[1]],
-            bottomRight: [(topLeft[0] + dimensionsIn[0] - 1), (topLeft[1] + dimensionsIn[1] - 1)]
         };
         this.layout = layout;
         this.cssProps = $.extend({}, dimensionsProperty, locationProperty);
@@ -168,34 +164,23 @@ define(['jquery'], function($) {
     };
 
     // Repositions a cell and updates internal properties.
-    Cell.prototype.reposition = function(newPosition) {
-        var boundPlots = this.boundingPlots;
 
-        console.log(boundPlots);
+    Cell.prototype.reposition = function(newPosition) {
+        var occupiedPlot;
+
+        console.log(this.occupiedPlots);
 
         this.cellInfo = {
             loc: newPosition,
             dim: this.cellInfo.dim
         };
 
-        this.boundingPlots = {
-            topLeft: newPosition,
-            bottomRight: [(newPosition[0] + this.cellInfo.dim[0] - 1), (newPosition[1] + this.cellInfo.dim[1] - 1)]
-        };
+        this.occupiedPlots = [];
 
-        // switching Plot occupied status to false for old location.
-        for (var i = boundPlots.topLeft[0]; i < boundPlots.topLeft[1] + 1; i++ ) {
-            for (var j = boundPlots.bottomRight[0]; j < boundPlots.bottomRight[1] + 1; j++) {
-                console.log([i, j]);
-                this.layout.Plots[i + '-' + j].occupied = false;
-            }
-        }
-
-        // switching Plot occupied status to true for new location.
-        for (var k = this.boundingPlots.topLeft[0]; k <= this.boundingPlots.topLeft[1] + 1; k++ ) {
-            for (var l = this.boundingPlots.bottomRight[0]; l <= this.boundingPlots.bottomRight[1] + 1; l++) {
-                console.log([k, l]);
-                this.layout.Plots[k + '-' + l].occupied = true;
+        for (var i = 0; i < this.cellInfo.dim[0]; i++) {
+            for (var j = 0; j < this.cellInfo.dim[1]; j++) {
+                occupiedPlot = (this.cellInfo.loc[0] + i) + '-' + (this.cellInfo.loc[1] + j);
+                this.occupiedPlots.push(occupiedPlot);
             }
         }
 
@@ -212,71 +197,24 @@ define(['jquery'], function($) {
         this.$obj.css(this.cssProps);
     };
 
-    // Repositions the cell right one grid unit.
-    Cell.prototype.nudgeRight = function() {
-        var boundPlots = this.boundingPlots,
-            newBoundingPlots = {
-                topLeft: [boundPlots.topLeft[0], boundPlots.topLeft[1] + 1],
-                bottomRight: [boundPlots.bottomRight[0], boundPlots.bottomRight[1] + 1]
-            },
-            newPositionPlot = this.layout.Plots[newBoundingPlots.topLeft[0] + '-' + newBoundingPlots.topLeft[1]];
-
-        this.location = {
-            top: newPositionPlot.cssProps.top,
-            left: newPositionPlot.cssProps.left
-        };
-
-        this.positionPlot = newPositionPlot;
-
-        this.boundingPlots = newBoundingPlots;
-
-        this.cssProps = $.extend({}, this.dimensions, this.location);
-
-        this.$obj.animate(this.cssProps, 500);
-
-    };
-
-    Cell.prototype.nudgeLeft = function() {
-        var boundPlots = this.boundingPlots,
-            newBoundingPlots = {
-                topLeft: [boundPlots.topLeft[0], boundPlots.topLeft[1] - 1],
-                bottomRight: [boundPlots.bottomRight[0], boundPlots.bottomRight[1] + 1]
-            },
-            newPositionPlot = this.layout.Plots[newBoundingPlots.topLeft[0] + '-' + newBoundingPlots.topLeft[1]];
-
-        this.location = {
-            top: newPositionPlot.cssProps.top,
-            left: newPositionPlot.cssProps.left
-        };
-
-        this.positionPlot = newPositionPlot;
-
-        this.boundingPlots = newBoundingPlots;
-
-        this.cssProps = $.extend({}, this.dimensions, this.location);
-
-        this.$obj.animate(this.cssProps, 500);
-
-    };
-
     Cell.prototype.render = function() {
         this.container.append(this.$obj);
     };
 
-
     // A plot is an unoccupied space on the layout grid. The layout object
     // contains col * rows plots. A plot's only purpose is to contain positioning
     // information to be used by cells.
+
     var Plot = function(params, layout) {
-        var position = layout.cellDimensions(params.row, params.col);
+        var plotDimensions = layout.cellDimensions(params.row, params.col);
 
         this.location = {
             row: params.row,
             column: params.col
         };
         this.cssProps = {
-            left: position.width,
-            top: position.height
+            left: plotDimensions.width,
+            top: plotDimensions.height
         };
 
         this.occupied = false;
