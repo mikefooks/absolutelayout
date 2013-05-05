@@ -167,15 +167,31 @@ define(['jquery'], function($) {
 
     Cell.prototype.reposition = function(newPosition) {
         var that = this,
-            occupiedPlot;
+            occupiedPlot,
+            renderOkay = true,
+            backupAttrs = {
+                buCellInfo: this.cellInfo,
+                buOccupiedPlots: this.occupiedPlots,
+                buLayoutPlots: this.layout.Plots
+            };
+
+        function restoreBackup() {
+            that.cellInfo = backupAttrs.buCellInfo;
+            that.occupiedPlots = backupAttrs.buOccupiedPlots;
+            backupAttrs.buOccupiedPlots.forEach(function(plot) {
+                that.layout.Plots[plot].occupied = true;
+            });
+        }
 
         this.cellInfo = {
             loc: newPosition,
             dim: this.cellInfo.dim
         };
 
-        this.occupiedPlots.forEach(function(prop) {
-            that.layout.Plots[prop].occupied = false;
+        console.log(this.cellInfo);
+
+        this.occupiedPlots.forEach(function(plot) {
+            that.layout.Plots[plot].occupied = false;
         });
 
         this.occupiedPlots = [];
@@ -183,7 +199,14 @@ define(['jquery'], function($) {
         for (var i = 0; i < this.cellInfo.dim[0]; i++) {
             for (var j = 0; j < this.cellInfo.dim[1]; j++) {
                 occupiedPlot = (this.cellInfo.loc[0] + i) + '-' + (this.cellInfo.loc[1] + j);
-                this.occupiedPlots.push(occupiedPlot);
+                if (this.layout.Plots[occupiedPlot].occupied === false) {
+                    this.occupiedPlots.push(occupiedPlot);
+                    console.log('this worked!');
+                } else {
+                    restoreBackup();
+                    console.log('cannot move there! restoring backup...');
+                    return;
+                }
             }
         }
 
