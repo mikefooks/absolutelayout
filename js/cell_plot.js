@@ -131,19 +131,25 @@ define(['jquery'], function($) {
     var Cell = function(params, layout) {
         var that = this,
             topLeft = params.topLeft,
-            dimensionsIn = params.dimensionsIn;
+            dimensionsIn = params.dimensionsIn,
+            positionPlot = layout.Plots[topLeft[0] + '-' + topLeft[1]],
+            dimensionsProperty = layout.cellDimensions(dimensionsIn[0], dimensionsIn[1]),
+            locationProperty = {
+                top: positionPlot.cssProps.top,
+                left: positionPlot.cssProps.left
+            };
 
-        this.positionPlot = layout.Plots[topLeft[0] + '-' + topLeft[1]];
+        this.positionPlot = positionPlot;
+        this.cellInfo = {
+            loc: topLeft,
+            dim: dimensionsIn
+        };
         this.boundingPlots = {
             topLeft: [topLeft[0], topLeft[1]],
             bottomRight: [(topLeft[0] + dimensionsIn[0] - 1), (topLeft[1] + dimensionsIn[1] - 1)]
         };
         this.layout = layout;
-        this.dimensions = layout.cellDimensions(params.dimensionsIn[0], params.dimensionsIn[1]);
-        this.location = {
-            top: this.positionPlot.cssProps.top,
-            left: this.positionPlot.cssProps.left
-        };
+        this.cssProps = $.extend({}, dimensionsProperty, locationProperty);
         this.idName = params.idName;
         this.classNames = [];
 
@@ -154,7 +160,7 @@ define(['jquery'], function($) {
         }
 
         this.container = layout.config.container;
-        this.cssProps = (function() { return $.extend({}, that.dimensions, that.location); })();
+
         this.$obj = $('<div></div>')
             .attr('id', this.idName)
             .addClass(this.classNames.join(' '))
@@ -162,19 +168,48 @@ define(['jquery'], function($) {
     };
 
     // Repositions a cell and updates internal properties.
-    Cell.prototype.position = function(newPosition, speed) {
-        var newPositionPlot = this.layout.Plots[newPosition[0] + '-' + newPosition[1]];
+    Cell.prototype.reposition = function(newPosition) {
+        var boundPlots = this.boundingPlots;
 
-        this.location = {
-            top: newPositionPlot.cssProps.top,
-            left: newPositionPlot.cssProps.left
+        console.log(boundPlots);
+
+        this.cellInfo = {
+            loc: newPosition,
+            dim: this.cellInfo.dim
         };
 
-        this.positionPlot = newPositionPlot;
+        this.boundingPlots = {
+            topLeft: newPosition,
+            bottomRight: [(newPosition[0] + this.cellInfo.dim[0] - 1), (newPosition[1] + this.cellInfo.dim[1] - 1)]
+        };
 
-        this.cssProps = $.extend({}, this.dimensions, this.location);
+        // switching Plot occupied status to false for old location.
+        for (var i = boundPlots.topLeft[0]; i < boundPlots.topLeft[1] + 1; i++ ) {
+            for (var j = boundPlots.bottomRight[0]; j < boundPlots.bottomRight[1] + 1; j++) {
+                console.log([i, j]);
+                this.layout.Plots[i + '-' + j].occupied = false;
+            }
+        }
 
-        this.$obj.animate(this.cssProps, speed);
+        // switching Plot occupied status to true for new location.
+        for (var k = this.boundingPlots.topLeft[0]; k <= this.boundingPlots.topLeft[1] + 1; k++ ) {
+            for (var l = this.boundingPlots.bottomRight[0]; l <= this.boundingPlots.bottomRight[1] + 1; l++) {
+                console.log([k, l]);
+                this.layout.Plots[k + '-' + l].occupied = true;
+            }
+        }
+
+        this.positionPlot = this.layout.Plots[newPosition[0] + '-' + newPosition[1]];
+
+        this.cssProps = $.extend({},
+            this.layout.cellDimensions(this.cellInfo.dim[0], this.cellInfo.dim[1]),
+            {
+                top: this.positionPlot.cssProps.top,
+                left: this.positionPlot.cssProps.left
+            }
+        );
+
+        this.$obj.css(this.cssProps);
     };
 
     // Repositions the cell right one grid unit.
