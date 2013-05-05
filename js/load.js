@@ -12,7 +12,7 @@ require(['jquery', 'cell_plot'], function($, Playout) {
     $(document).ready(function() {
         var layout = new Playout.Layout({
             fluid: false,
-            container: 'div#container',
+            container: 'div.container',
             columns: 8,
             rows: 8
         });
@@ -20,7 +20,7 @@ require(['jquery', 'cell_plot'], function($, Playout) {
         window.layout = layout;
     });
 
-    $('div#container').on('click', function(evt) {
+    $('div.container').on('click', function(evt) {
 
         var contDimensions = layout.containerDimensions,
             plotX = Math.floor(evt.originalEvent.layerX / contDimensions.width * layout.config.columns),

@@ -117,10 +117,10 @@ define(['jquery'], function($) {
     };
 
     Layout.prototype.clearAllCells = function() {
-        var cellDataKeys = Object.keys(this.Cells);
-
-        for (var i = 0; i < cellDataKeys.length; i++) {
-            this.Cells[cellDataKeys[i]].$obj.remove();
+        for (var prop in this.Cells) {
+            if (this.Cells.hasOwnProperty(prop)) {
+                this.Cells[prop].$obj.remove();
+            }
         }
 
         this.Cells = {};
@@ -129,7 +129,8 @@ define(['jquery'], function($) {
     // Cell is an actual element meant for appending to the DOM, it occupies a point on the
     // layout determined by its associated position Plot.
     var Cell = function(params, layout) {
-        var topLeft = params.topLeft,
+        var that = this,
+            topLeft = params.topLeft,
             dimensionsIn = params.dimensionsIn;
 
         this.positionPlot = layout.Plots[topLeft[0] + '-' + topLeft[1]];
@@ -153,7 +154,7 @@ define(['jquery'], function($) {
         }
 
         this.container = layout.config.container;
-        this.cssProps = $.extend({}, this.dimensions, this.location);
+        this.cssProps = (function() { return $.extend({}, that.dimensions, that.location); })();
         this.$obj = $('<div></div>')
             .attr('id', this.idName)
             .addClass(this.classNames.join(' '))
@@ -174,6 +175,53 @@ define(['jquery'], function($) {
         this.cssProps = $.extend({}, this.dimensions, this.location);
 
         this.$obj.animate(this.cssProps, speed);
+    };
+
+    // Repositions the cell right one grid unit.
+    Cell.prototype.nudgeRight = function() {
+        var boundPlots = this.boundingPlots,
+            newBoundingPlots = {
+                topLeft: [boundPlots.topLeft[0], boundPlots.topLeft[1] + 1],
+                bottomRight: [boundPlots.bottomRight[0], boundPlots.bottomRight[1] + 1]
+            },
+            newPositionPlot = this.layout.Plots[newBoundingPlots.topLeft[0] + '-' + newBoundingPlots.topLeft[1]];
+
+        this.location = {
+            top: newPositionPlot.cssProps.top,
+            left: newPositionPlot.cssProps.left
+        };
+
+        this.positionPlot = newPositionPlot;
+
+        this.boundingPlots = newBoundingPlots;
+
+        this.cssProps = $.extend({}, this.dimensions, this.location);
+
+        this.$obj.animate(this.cssProps, 500);
+
+    };
+
+    Cell.prototype.nudgeLeft = function() {
+        var boundPlots = this.boundingPlots,
+            newBoundingPlots = {
+                topLeft: [boundPlots.topLeft[0], boundPlots.topLeft[1] - 1],
+                bottomRight: [boundPlots.bottomRight[0], boundPlots.bottomRight[1] + 1]
+            },
+            newPositionPlot = this.layout.Plots[newBoundingPlots.topLeft[0] + '-' + newBoundingPlots.topLeft[1]];
+
+        this.location = {
+            top: newPositionPlot.cssProps.top,
+            left: newPositionPlot.cssProps.left
+        };
+
+        this.positionPlot = newPositionPlot;
+
+        this.boundingPlots = newBoundingPlots;
+
+        this.cssProps = $.extend({}, this.dimensions, this.location);
+
+        this.$obj.animate(this.cssProps, 500);
+
     };
 
     Cell.prototype.render = function() {

@@ -1,12 +1,20 @@
 // ---------------------------------------------------------------------------
 // Imports
 
+@import "compass/reset";
 @import "base";
 
 /* -------------------------------------------------------------------------*/
 /* Layout */
 
 .container {
-  @include container;
-  @include susy-grid-background;
+    position: relative;
+    width: 80%;
+    height: 500px;
+    outline: 1px red dashed;
+}
+
+.content-box {
+    position: absolute;
+    outline: 1px red dashed;
 }
