@@ -194,7 +194,10 @@ define(['jquery'], function($) {
                 buCellInfo: this.cellInfo,
                 buOccupiedPlots: this.occupiedPlots,
                 buLayoutPlots: this.layout.Plots
-            };
+            },
+            occupied = this.layout.checkPosition(this.cellInfo.dim[0], this.cellInfo.dim[1], newPosition[0], newPosition[1]);
+
+        console.log(occupied);
 
         function restoreBackup() {
             that.cellInfo = backupAttrs.buCellInfo;
@@ -209,15 +212,13 @@ define(['jquery'], function($) {
             dim: this.cellInfo.dim
         };
 
-        console.log(this.cellInfo);
-
         this.occupiedPlots.forEach(function(plot) {
             that.layout.Plots[plot].occupied = false;
         });
 
         this.occupiedPlots = [];
 
-        for (var i = 0; i < this.cellInfo.dim[0]; i++) {
+        /* for (var i = 0; i < this.cellInfo.dim[0]; i++) {
             for (var j = 0; j < this.cellInfo.dim[1]; j++) {
                 occupiedPlot = (this.cellInfo.loc[0] + i) + '-' + (this.cellInfo.loc[1] + j);
                 if (this.layout.Plots[occupiedPlot].occupied === false) {
@@ -229,7 +230,7 @@ define(['jquery'], function($) {
                     return;
                 }
             }
-        }
+        } */
 
         this.occupiedPlots.forEach(function(prop) {
             that.layout.Plots[prop].occupied = true;
