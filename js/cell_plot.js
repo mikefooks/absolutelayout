@@ -17,49 +17,70 @@ define(['jquery'], function($) {
         this.refresh();
     };
 
+    // Checks to make sure if any of the Plots involved in the rendering or
+    // repositioning of a cell are occupied or out of bounds, and returns an
+    // object containing the names of the affected plots and a flag indicating
+    // whether it is safe to proceed with the operation.
+    Layout.prototype.checkPosition = function(rowsHeight, colsWidth, posHeight, posWidth) {
+        var that = this,
+            occupiedPlots = [],
+            occupiedPlot,
+            renderFlag = true;
+
+        for (var i = 0 ; i < rowsHeight; i += 1) {
+            for (var j = 0 ; j < colsWidth; j += 1) {
+                occupiedPlot = (posHeight + i) + '-' + (posWidth + j);
+                console.log(occupiedPlot);
+                occupiedPlots.push(occupiedPlot);
+            }
+        }
+
+        occupiedPlots.forEach(function(obj, idx) {
+            if (that.Plots.hasOwnProperty(obj)) {
+                if (that.Plots[obj].occupied === true) {
+                    renderFlag = false;
+                }
+            } else {
+                renderFlag = false;
+            }
+        });
+
+        return {
+            occupiedPlots: occupiedPlots,
+            renderFlag: renderFlag
+        };
+    };
+
     // Adds a cell to the container and registers it with the Cells object.
     // dimensionsIn([number]rows, [number]columns) > number of rows and columns to span with new cell
     // topLeft([number]top, [number]left) > position of top left corner of cell.
 
     Layout.prototype.addCell = function(dimensionsIn, topLeft, idName, classNames) {
         var that = this,
-        occupiedPlots = [],
-        renderFlag = true,
-        occupiedPlot,
+            occupiedPlots = [],
+            renderFlag = true,
+            occupiedPlot,
+            newCell = new Cell({
+                dimensionsIn: dimensionsIn,
+                topLeft: topLeft,
+                idName: idName,
+                classNames: classNames
+            }, this),
+            occupied = this.checkPosition(dimensionsIn[0], dimensionsIn[1], topLeft[0], topLeft[1]);
 
-        newCell = new Cell({
-            dimensionsIn: dimensionsIn,
-            topLeft: topLeft,
-            idName: idName,
-            classNames: classNames
-        }, this);
-
-        this.Cells[newCell.idName] = newCell;
-
-        for (var i = 0; i < dimensionsIn[0]; i++) {
-            for (var j = 0; j < dimensionsIn[1]; j++) {
-                occupiedPlot = (topLeft[0] + i) + '-' + (topLeft[1] + j);
-                occupiedPlots.push(occupiedPlot);
-            }
-        }
-
-        occupiedPlots.forEach(function(obj, idx) {
-            if (that.Plots[obj].occupied === true) {
-                renderFlag = false;
-            }
-        });
-
-        if (renderFlag) {
-            occupiedPlots.forEach(function(obj, idx) {
+        if (!occupied.renderFlag) {
+            console.log('cannot render a new cell on an occupied plot!');
+            return;
+        } else {
+            occupied.occupiedPlots.forEach(function(obj, idx) {
                 that.Plots[obj].occupied = true;
             });
+
+            this.Cells[newCell.idName] = newCell;
 
             newCell.occupiedPlots = occupiedPlots;
 
             newCell.render();
-
-        } else {
-            console.log('cannot render a new cell on an occupied plot!');
         }
     };
 
