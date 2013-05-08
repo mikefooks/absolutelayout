@@ -27,11 +27,11 @@ define(['jquery'], function($) {
             currentOccupied = this.getOccupied();
 
         plots.forEach(function(obj, idx) {
-            if (that.Plots.hasOwnProperty(obj)) {
-                if (!currentOccupied.indexOf(obj)) {
-                    renderFlag = false;
-                }
-            } else {
+            if (!that.Plots.hasOwnProperty(obj)) {
+                console.log('plot out of bounds');
+                renderFlag = false;
+            } else if (currentOccupied.indexOf(obj) !== -1) {
+                console.log('plot currently occupied');
                 renderFlag = false;
             }
         });
@@ -210,14 +210,12 @@ define(['jquery'], function($) {
         // Creates an array of new occupied plots, minus the ones which intersect from
         // the cell's previous position, to avoid conflicts with the render flag.
         adjustedPlots = newPlots.filter(function(obj, idx) {
-            if (that.occupiedPlots.indexOf(obj)) {
+            if (that.occupiedPlots.indexOf(obj) === -1) {
                 return obj;
             }
         });
 
         if (this.layout.checkPosition(adjustedPlots)) {
-
-            console.log('it is a go!');
 
             this.occupiedPlots.forEach(function(plot) {
                 that.layout.Plots[plot].occupied = false;

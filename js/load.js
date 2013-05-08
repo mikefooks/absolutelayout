@@ -14,6 +14,8 @@ require(['jquery', 'cell_plot', 'mediator'], function($, Playout, Mediator) {
 
     layout.addCell([4, 4], [3, 3], 'box_1', 'content-box');
 
+    layout.addCell([2, 2], [0, 0], 'box_2', 'content-box');
+
     window.layout = layout;
-    
+
 });
