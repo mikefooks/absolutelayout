@@ -21,34 +21,39 @@ define(['jquery'], function($) {
     // repositioning of a cell are occupied or out of bounds, and returns an
     // object containing the names of the affected plots and a flag indicating
     // whether it is safe to proceed with the operation.
-    Layout.prototype.checkPosition = function(rowsHeight, colsWidth, posHeight, posWidth) {
+    Layout.prototype.checkPosition = function(plots) {
         var that = this,
-            occupiedPlots = [],
-            occupiedPlot,
-            renderFlag = true;
+            renderFlag = true,
+            currentOccupied = this.getOccupied();
 
-        for (var i = 0 ; i < rowsHeight; i += 1) {
-            for (var j = 0 ; j < colsWidth; j += 1) {
-                occupiedPlot = (posHeight + i) + '-' + (posWidth + j);
-                console.log(occupiedPlot);
-                occupiedPlots.push(occupiedPlot);
-            }
-        }
-
-        occupiedPlots.forEach(function(obj, idx) {
+        plots.forEach(function(obj, idx) {
             if (that.Plots.hasOwnProperty(obj)) {
-                if (that.Plots[obj].occupied === true) {
-                    renderFlag = false;
-                }
+                console.log(currentOccupied);
+                console.log('everything exists so far.');
             } else {
                 renderFlag = false;
             }
         });
 
-        return {
-            occupiedPlots: occupiedPlots,
-            renderFlag: renderFlag
-        };
+        return renderFlag;
+    };
+
+
+    // returns an array with the names of the plots which a theoretical cell with
+    // the provided location and dimensions would occupy.
+    Layout.prototype.getPlots = function(rows, columns, top, left) {
+        var plots = [],
+            onePlot;
+
+        for (var i = 0 ; i < rows; i += 1) {
+            for (var j = 0 ; j < columns; j += 1) {
+                onePlot = (top + i) + '-' + (left + j);
+                plots.push(onePlot);
+            }
+        }
+
+        return plots;
+
     };
 
     // Adds a cell to the container and registers it with the Cells object.
@@ -66,19 +71,19 @@ define(['jquery'], function($) {
                 idName: idName,
                 classNames: classNames
             }, this),
-            occupied = this.checkPosition(dimensionsIn[0], dimensionsIn[1], topLeft[0], topLeft[1]);
+            plots = this.getPlots(dimensionsIn[0], dimensionsIn[1], topLeft[0], topLeft[1]);
 
-        if (!occupied.renderFlag) {
+        if (!this.checkPosition(plots)) {
             console.log('cannot render a new cell on an occupied plot!');
             return;
         } else {
-            occupied.occupiedPlots.forEach(function(obj, idx) {
+            plots.forEach(function(obj, idx) {
                 that.Plots[obj].occupied = true;
             });
 
             this.Cells[newCell.idName] = newCell;
 
-            newCell.occupiedPlots = occupiedPlots;
+            newCell.occupiedPlots = plots;
 
             newCell.render();
         }
@@ -136,6 +141,17 @@ define(['jquery'], function($) {
         return unoccupied;
     };
 
+    Layout.prototype.getOccupied = function() {
+        var that = this,
+            occupied = $.grep(Object.keys(this.Plots), function(obj, idx) {
+            if (that.Plots[obj].occupied === true) {
+                return obj;
+            }
+        });
+
+        return occupied;
+    };
+
     Layout.prototype.clearAllCells = function() {
         for (var prop in this.Cells) {
             if (this.Cells.hasOwnProperty(prop)) {
@@ -188,17 +204,27 @@ define(['jquery'], function($) {
 
     Cell.prototype.reposition = function(newPosition) {
         var that = this,
-            occupiedPlot,
-            renderOkay = true,
             backupAttrs = {
                 buCellInfo: this.cellInfo,
                 buOccupiedPlots: this.occupiedPlots,
                 buLayoutPlots: this.layout.Plots
             },
-            occupied = this.layout.checkPosition(this.cellInfo.dim[0], this.cellInfo.dim[1], newPosition[0], newPosition[1]);
+            newPlots = this.layout.getPlots(this.cellInfo.dim[0], this.cellInfo.dim[1], newPosition[0], newPosition[1]),
+            adjustedPlots;
 
-        console.log(occupied);
+        // Creates an array of new occupied plots, minus the ones which intersect from
+        // the cell's previous position, to avoid conflicts with the render flag.
+        adjustedPlots = newPlots.filter(function(obj, idx) {
+            if (that.occupiedPlots.indexOf(obj)) {
+                return obj;
+            }
+        });
 
+        console.log(adjustedPlots);
+        console.log(this.layout.checkPosition(adjustedPlots));
+
+
+        /*
         function restoreBackup() {
             that.cellInfo = backupAttrs.buCellInfo;
             that.occupiedPlots = backupAttrs.buOccupiedPlots;
@@ -208,17 +234,10 @@ define(['jquery'], function($) {
         }
 
         this.cellInfo = {
-            loc: newPosition,
-            dim: this.cellInfo.dim
+
         };
 
-        this.occupiedPlots.forEach(function(plot) {
-            that.layout.Plots[plot].occupied = false;
-        });
-
-        this.occupiedPlots = [];
-
-        /* for (var i = 0; i < this.cellInfo.dim[0]; i++) {
+        for (var i = 0; i < this.cellInfo.dim[0]; i++) {
             for (var j = 0; j < this.cellInfo.dim[1]; j++) {
                 occupiedPlot = (this.cellInfo.loc[0] + i) + '-' + (this.cellInfo.loc[1] + j);
                 if (this.layout.Plots[occupiedPlot].occupied === false) {
@@ -230,7 +249,7 @@ define(['jquery'], function($) {
                     return;
                 }
             }
-        } */
+        }
 
         this.occupiedPlots.forEach(function(prop) {
             that.layout.Plots[prop].occupied = true;
@@ -246,7 +265,7 @@ define(['jquery'], function($) {
             }
         );
 
-        this.$obj.css(this.cssProps);
+        this.$obj.css(this.cssProps); */
     };
 
     Cell.prototype.render = function() {
