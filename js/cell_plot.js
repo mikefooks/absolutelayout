@@ -28,8 +28,9 @@ define(['jquery'], function($) {
 
         plots.forEach(function(obj, idx) {
             if (that.Plots.hasOwnProperty(obj)) {
-                console.log(currentOccupied);
-                console.log('everything exists so far.');
+                if (!currentOccupied.indexOf(obj)) {
+                    renderFlag = false;
+                }
             } else {
                 renderFlag = false;
             }
@@ -53,7 +54,6 @@ define(['jquery'], function($) {
         }
 
         return plots;
-
     };
 
     // Adds a cell to the container and registers it with the Cells object.
@@ -204,11 +204,6 @@ define(['jquery'], function($) {
 
     Cell.prototype.reposition = function(newPosition) {
         var that = this,
-            backupAttrs = {
-                buCellInfo: this.cellInfo,
-                buOccupiedPlots: this.occupiedPlots,
-                buLayoutPlots: this.layout.Plots
-            },
             newPlots = this.layout.getPlots(this.cellInfo.dim[0], this.cellInfo.dim[1], newPosition[0], newPosition[1]),
             adjustedPlots;
 
@@ -220,52 +215,35 @@ define(['jquery'], function($) {
             }
         });
 
-        console.log(adjustedPlots);
-        console.log(this.layout.checkPosition(adjustedPlots));
+        if (this.layout.checkPosition(adjustedPlots)) {
 
+            console.log('it is a go!');
 
-        /*
-        function restoreBackup() {
-            that.cellInfo = backupAttrs.buCellInfo;
-            that.occupiedPlots = backupAttrs.buOccupiedPlots;
-            backupAttrs.buOccupiedPlots.forEach(function(plot) {
+            this.occupiedPlots.forEach(function(plot) {
+                that.layout.Plots[plot].occupied = false;
+            });
+
+            newPlots.forEach(function(plot) {
                 that.layout.Plots[plot].occupied = true;
             });
-        }
 
-        this.cellInfo = {
-
-        };
-
-        for (var i = 0; i < this.cellInfo.dim[0]; i++) {
-            for (var j = 0; j < this.cellInfo.dim[1]; j++) {
-                occupiedPlot = (this.cellInfo.loc[0] + i) + '-' + (this.cellInfo.loc[1] + j);
-                if (this.layout.Plots[occupiedPlot].occupied === false) {
-                    this.occupiedPlots.push(occupiedPlot);
-                    console.log('this worked!');
-                } else {
-                    restoreBackup();
-                    console.log('cannot move there! restoring backup...');
-                    return;
+            this.occupiedPlots = newPlots;
+            this.cellInfo.loc = newPosition;
+            this.positionPlot = this.layout.Plots[newPosition[0] + '-' + newPosition[1]];
+            this.cssProps = $.extend({},
+                this.layout.cellDimensions(this.cellInfo.dim[0], this.cellInfo.dim[1]),
+                {
+                    top: this.positionPlot.cssProps.top,
+                    left: this.positionPlot.cssProps.left
                 }
-            }
+            );
+
+            this.$obj.css(this.cssProps);
+
+        } else {
+
+            console.log("renderFlag returned false. something is in the way");
         }
-
-        this.occupiedPlots.forEach(function(prop) {
-            that.layout.Plots[prop].occupied = true;
-        });
-
-        this.positionPlot = this.layout.Plots[newPosition[0] + '-' + newPosition[1]];
-
-        this.cssProps = $.extend({},
-            this.layout.cellDimensions(this.cellInfo.dim[0], this.cellInfo.dim[1]),
-            {
-                top: this.positionPlot.cssProps.top,
-                left: this.positionPlot.cssProps.left
-            }
-        );
-
-        this.$obj.css(this.cssProps); */
     };
 
     Cell.prototype.render = function() {
