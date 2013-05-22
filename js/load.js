@@ -10,7 +10,7 @@ require(['jquery', 'cell_plot', 'mediator'], function($, Playout, Mediator) {
 
     "use strict";
 
-    var layout = new Playout.Layout({container: 'div.container', fluid: false, columns: 8, rows: 8});
+    var layout = new Playout.Layout({container: 'div.container', fluid: true, columns: 8, rows: 8});
 
     layout.addCell([4, 4], [3, 3], 'box_1', 'content-box');
 

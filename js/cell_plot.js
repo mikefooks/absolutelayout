@@ -197,7 +197,8 @@ define(['jquery'], function($) {
         this.$obj = $('<div></div>')
             .attr('id', this.idName)
             .addClass(this.classNames.join(' '))
-            .css(this.cssProps);
+            .css(this.cssProps)
+            .html("<p>" + this.idName + "</p>");
     };
 
     // Repositions a cell and updates internal properties.
