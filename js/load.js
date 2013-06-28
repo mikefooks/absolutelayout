@@ -1,12 +1,12 @@
 require.config({
     paths: {
         'jquery': 'lib/jquery-1.9.1.min',
-        'cell_plot': 'cell_plot',
+        'layout': 'layout',
         'mediator': 'mediator'
     }
 });
 
-require(['jquery', 'cell_plot', 'mediator'], function($, Playout, Mediator) {
+require(['jquery', 'layout', 'mediator'], function($, Playout, Mediator) {
 
     "use strict";
 
