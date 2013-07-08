@@ -170,7 +170,7 @@ define(['jquery'], function($) {
         for (var i = 0; i < cellKeys.length; i+=1) {
             cellcssString = JSON.stringify(this.Cells[cellKeys[i]].cssProps, null, "\t").split();
             cellcssString.unshift(cellKeys[i] + " ");
-            cellcssString = cellcssString.join("").replace(/[",]/g, "");
+            cellcssString = cellcssString.join("").replace(/[\",]/g, "");
             cellcssString = cellcssString.replace(/[0-9\.]{1,3}(%|px)/g, "$&;");
             cssString += cellcssString + "\n";
         }

@@ -1,5 +1,5 @@
-define(['cell_plot'], function(Layout) {
-    
+define(['layout'], function(Layout) {
+
     var Mediator = {
         Models: {
             Layout: Layout.Layout,
