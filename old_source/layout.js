@@ -17,10 +17,13 @@ define(['jquery'], function($) {
         this.refresh();
     };
 
-    // Checks to make sure if any of the Plots involved in the rendering or
-    // repositioning of a cell are occupied or out of bounds, and returns an
-    // object containing the names of the affected plots and a flag indicating
-    // whether it is safe to proceed with the operation.
+    /** 
+    * Checks to make sure if any of the Plots involved in the rendering or
+    * repositioning of a cell are occupied or out of bounds, and returns an
+    * object containing the names of the affected plots and a flag indicating
+    * whether it is safe to proceed with the operation.
+    */
+
     Layout.prototype.checkPosition = function(plots) {
         var that = this,
             renderFlag = true,

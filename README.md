@@ -1,4 +1,4 @@
 absolutelayout
 ==============
 
-A tool for creating absolute-positioned grid -based layouts
+A tool for creating absolute-positioned grid-based layouts
