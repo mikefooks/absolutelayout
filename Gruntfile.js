@@ -26,10 +26,17 @@ module.exports = function(grunt) {
                     }
                 }
             }
+        },
+        watch: {
+            unit_tests: {
+                files: ['src/*.js', 'src/**/*.js', 'spec/*_spec.js'],
+                tasks: ['test']
+            }
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-jasmine');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     grunt.registerTask('test', ['jasmine:layout']);
 };
