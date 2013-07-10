@@ -7,6 +7,7 @@ module.exports = function(grunt) {
                 options: {
                     specs: 'spec/*_spec.js',
                     helpers: 'spec/helpers/*.js',
+                    keepRunner: false,
                     template: require('grunt-template-jasmine-requirejs'),
                     templateOptions: {
                         requireConfig: {
@@ -20,6 +21,11 @@ module.exports = function(grunt) {
                                     "name": "lodash",
                                     "location": "src/vendor/lodash",
                                     "main": "./dist/lodash.compat.js"
+                                },
+                                {
+                                    "name": "text",
+                                    "location": "src/vendor/text",
+                                    "main": "text.js"
                                 }
                             ]
                         }

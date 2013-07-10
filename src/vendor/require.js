@@ -2010,6 +2010,11 @@ var jam = {
             "name": "lodash",
             "location": "vendor/lodash",
             "main": "./dist/lodash.compat.js"
+        },
+        {
+            "name": "text",
+            "location": "vendor/text",
+            "main": "text.js"
         }
     ],
     "version": "0.2.17",
@@ -2028,6 +2033,11 @@ if (typeof require !== "undefined" && require.config) {
             "name": "lodash",
             "location": "vendor/lodash",
             "main": "./dist/lodash.compat.js"
+        },
+        {
+            "name": "text",
+            "location": "vendor/text",
+            "main": "text.js"
         }
     ],
     "shim": {}
@@ -2045,6 +2055,11 @@ else {
             "name": "lodash",
             "location": "vendor/lodash",
             "main": "./dist/lodash.compat.js"
+        },
+        {
+            "name": "text",
+            "location": "vendor/text",
+            "main": "text.js"
         }
     ],
     "shim": {}

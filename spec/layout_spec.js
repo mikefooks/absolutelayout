@@ -1,4 +1,6 @@
-define(['layout', 'jquery'], function(Layout, $) {
+define(['layout', 'jquery', 'text!spec/fixtures/wrapper_fixture.html'], function(Layout, $, Wrapper) {
+
+    jasmine.getFixtures().fixturesPath = 'fixtures/';
 
     describe('Layout object form and instantiation', function() {
         var testLayout;
@@ -27,26 +29,33 @@ define(['layout', 'jquery'], function(Layout, $) {
             fakeConfigObj,
             testLayout;
 
+        /**
+        * Load a little HTML partial to play with.
+        */
+
         beforeEach(function() {
-            fakeContainer = $('<div></div>')
-                .addClass('wrapper')
-                .css({
-                    'width' : '1000px',
-                    'height' : '1000px'
-                });
+            fakeContainer = $(Wrapper),
             fakeConfigObj = {
                 fluid: false,
-                container: 'div.wrapper',
+                container: 'section.main',
                 columns: 10,
                 rows: 10
-            };
+            },
             testLayout = new Layout.Layout();
+
             testLayout.initConfig(fakeConfigObj);
         });
 
         afterEach(function() {
-            fakeContainer = null;
-            fakeConfigObj = null;
+            fakeContainer = fakeConfigObj = testLayout = null;
+        });
+
+        it('HTML fixture should be properly loaded', function() {
+            expect(fakeContainer).toContain('section.main');
+        });
+
+        it('HTML fixture should have the proper contents', function() {
+            expect(fakeContainer.find('section')[0]).toHaveClass('main');
         });
 
         it('should accept config object', function() {
