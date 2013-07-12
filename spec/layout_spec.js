@@ -168,5 +168,9 @@ define(['layout',
             expect(testLayout.checkPosition(['3-2', '3-3'])).toBe(false);
         });
 
+        it('should return true when no specific plots are occupied', function() {
+            expect(testLayout.checkPosition(['1-2', '2-2'])).toBe(true);
+        });
+
     });
 });
