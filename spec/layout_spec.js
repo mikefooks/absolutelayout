@@ -118,7 +118,7 @@ define(['layout',
         });
 
         afterEach(function() {
-            testLayout = fakeConfig = null;
+            testLayout = fakeConfig = occupiedPlots = null;
         });
 
         it('should return the correct number of plots', function() {
@@ -134,6 +134,38 @@ define(['layout',
             expect(occupiedPlots[1]).toBe('1-2');
             expect(occupiedPlots[2]).toBe('2-1');
             expect(occupiedPlots[3]).toBe('2-2');
+        });
+
+    });
+
+    describe('Layout.checkPosition', function() {
+
+        var testLayout,
+            fakeConfig,
+            plots;
+
+        beforeEach(function() {
+            testLayout = new Layout.Layout(),
+            fakeConfig = {
+                fluid: true,
+                container: 'div.layout',
+                columns: 5,
+                rows: 5
+            };
+
+            testLayout.initConfig(fakeConfig);
+            testLayout.refresh();
+            ['3-3', '3-4', '4-3', '4-4'].forEach(function(obj) {
+                testLayout.Plots[obj].occupied = true;
+            });
+        });
+
+        afterEach(function() {
+            testLayout = fakeConfig = null;
+        });
+
+        it('should return false when one or more specified plots is occupied', function() {
+            expect(testLayout.checkPosition(['3-2', '3-3'])).toBe(false);
         });
 
     });
