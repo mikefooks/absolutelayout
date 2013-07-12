@@ -40,6 +40,34 @@ define('layout', ['jquery', 'lodash', 'plot'], function($, _, Plot) {
                     this.Plots[i + '-' +j] = newPlot;
                 }
             }
+        },
+        getOccupied: function() {
+            var that = this,
+                occupied = $.grep(Object.keys(this.Plots), function(obj, idx) {
+                if (that.Plots[obj].occupied === true) {
+                    return obj;
+                }
+            });
+
+            return occupied;
+        },
+        checkPosition: function(plots) {
+            var that = this,
+                renderFlag = true,
+                currentOccupied = this.getOccupied();
+
+            plots.forEach(function(obj, idx) {
+                if (!that.Plots.hasOwnProperty(obj)) {
+                    console.log('plot out of bounds');
+                    renderFlag = false;
+                } else if (currentOccupied.indexOf(obj) !== -1) {
+                    console.log('plot currently occupied');
+                    renderFlag = false;
+                }
+            });
+
+            return renderFlag;
+
         }
     };
 

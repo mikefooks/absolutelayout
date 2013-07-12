@@ -1,4 +1,7 @@
-define(['layout', 'jquery', 'text!spec/fixtures/wrapper_fixture.html'], function(Layout, $, Wrapper) {
+define(['layout',
+        'jquery',
+        'text!spec/fixtures/wrapper_fixture.html'],
+        function(Layout, $, Wrapper) {
 
     "use strict";
 
@@ -69,8 +72,8 @@ define(['layout', 'jquery', 'text!spec/fixtures/wrapper_fixture.html'], function
             fakeConfigObj = {
                 fluid: true,
                 container: 'div.layout',
-                columns: 10,
-                rows: 10
+                columns: 8,
+                rows: 8
             },
             testLayout = new Layout.Layout();
             testLayout.initConfig(fakeConfigObj);
@@ -82,7 +85,55 @@ define(['layout', 'jquery', 'text!spec/fixtures/wrapper_fixture.html'], function
         });
 
         it('should register new plots in the Layout object', function() {
-            expect(Object.keys(testLayout.Plots).length).toBe(100);
+            expect(Object.keys(testLayout.Plots).length).toBe(64);
+        });
+
+        it('plot key names should be right', function() {
+            expect(Object.keys(testLayout.Plots)[35]).toBe('4-3');
+        });
+
+    });
+
+    describe('Layout.getOccupied', function() {
+
+        var testLayout,
+            fakeConfig,
+            occupiedPlots;
+
+        beforeEach(function() {
+            testLayout = new Layout.Layout(),
+            fakeConfig = {
+                fluid: true,
+                container: 'div.layout',
+                columns: 5,
+                rows: 5
+            };
+
+            testLayout.initConfig(fakeConfig);
+            testLayout.refresh();
+            ['1-1', '1-2', '2-1', '2-2'].forEach(function(obj) {
+                testLayout.Plots[obj].occupied = true;
+            });
+            occupiedPlots = testLayout.getOccupied();
+        });
+
+        afterEach(function() {
+            testLayout = fakeConfig = null;
+        });
+
+        it('should return the correct number of plots', function() {
+            expect(occupiedPlots.length).toBe(4);
+        });
+
+        it('returned object is an array', function() {
+            expect(Array.isArray(occupiedPlots)).toBe(true);
+        });
+
+        it('returns the correct key names', function() {
+            expect(occupiedPlots[0]).toBe('1-1');
+            expect(occupiedPlots[1]).toBe('1-2');
+            expect(occupiedPlots[2]).toBe('2-1');
+            expect(occupiedPlots[3]).toBe('2-2');
         });
 
     });

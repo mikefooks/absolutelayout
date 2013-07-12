@@ -3,10 +3,12 @@ define(['layout', 'plot'], function(Layout, Plot) {
     describe('Plot object form and instantiation', function() {
         var testLayout,
             fakeConfig,
-            testPlot_1,
-            testPlot_2;
+            testPlot_1;
 
         beforeEach(function() {
+            /** 
+            * think long and hard about how you want to test fluid = false
+            */
             fakeConfig = {
                 fluid: true,
                 container: 'div.test',
@@ -36,10 +38,19 @@ define(['layout', 'plot'], function(Layout, Plot) {
             expect(Object.keys(testPlot_1).length).toBe(3);
         });
 
+        it('should have the proper values for location', function() {
+            expect(testPlot_1.location.row).toBe(3),
+            expect(testPlot_1.location.column).toBe(3);
+        });
+
         it('should have the proper values for row and column width', function() {
             /* 42.85714285714286% is 3 / 7 */
             expect(testPlot_1.cssProps.left).toBe('42.85714285714286%');
             expect(testPlot_1.cssProps.top).toBe('42.85714285714286%');
+        });
+
+        it('should have the proper value for occupied', function() {
+            expect(testPlot_1.occupied).toBe(false);
         });
 
     });
