@@ -18,11 +18,6 @@ module.exports = function(grunt) {
                                     "main": "dist/jquery.js"
                                 },
                                 {
-                                    "name": "lodash",
-                                    "location": "src/vendor/lodash",
-                                    "main": "./dist/lodash.compat.js"
-                                },
-                                {
                                     "name": "text",
                                     "location": "src/vendor/text",
                                     "main": "text.js"

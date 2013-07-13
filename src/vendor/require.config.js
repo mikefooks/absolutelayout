@@ -6,11 +6,6 @@ var jam = {
             "main": "dist/jquery.js"
         },
         {
-            "name": "lodash",
-            "location": "vendor/lodash",
-            "main": "./dist/lodash.compat.js"
-        },
-        {
             "name": "text",
             "location": "vendor/text",
             "main": "text.js"
@@ -29,11 +24,6 @@ if (typeof require !== "undefined" && require.config) {
             "main": "dist/jquery.js"
         },
         {
-            "name": "lodash",
-            "location": "vendor/lodash",
-            "main": "./dist/lodash.compat.js"
-        },
-        {
             "name": "text",
             "location": "vendor/text",
             "main": "text.js"
@@ -49,11 +39,6 @@ else {
             "name": "jquery",
             "location": "vendor/jquery",
             "main": "dist/jquery.js"
-        },
-        {
-            "name": "lodash",
-            "location": "vendor/lodash",
-            "main": "./dist/lodash.compat.js"
         },
         {
             "name": "text",

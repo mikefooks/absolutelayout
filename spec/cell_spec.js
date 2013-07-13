@@ -32,7 +32,9 @@ define(['layout', 'cell'], function(Layout, Cell) {
             },
             cellConfig = {
                 topLeft: [3, 4],
-                dimensionsIn: [2, 3]
+                dimensionsIn: [2, 3],
+                classNames: 'test-a-roo',
+                idName: 'test-cell'
             };
             testLayout.initConfig(layoutConfig);
             testLayout.refresh();
@@ -44,6 +46,22 @@ define(['layout', 'cell'], function(Layout, Cell) {
 
         afterEach(function() {
             testCell = null;
+        });
+
+        it('should have cellInfo attributes correctly assigned', function() {
+            expect(testCell.cellInfo.location[0]).toBe(3);
+            expect(testCell.cellInfo.location[1]).toBe(4);
+        });
+
+        it('should have cssProps attribute correctly assigned', function() {
+            expect(testCell.cssProps.top).toBe('30%');
+            expect(testCell.cssProps.left).toBe('40%');
+            expect(testCell.cssProps.width).toBe('30%');
+            expect(testCell.cssProps.height).toBe('20%');
+        });
+
+        it('$obj property should look good', function() {
+            expect(testCell.$obj).toHaveClass('test-a-roo');
         });
     });
 

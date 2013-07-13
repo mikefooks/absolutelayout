@@ -1,7 +1,7 @@
 define('layout', ['jquery', 'plot', 'cell'], function($, Plot, Cell) {
 
     /**
-    * The contructor for the layout object
+    * The Layout Constructor!
     */
     var Layout = function() {
         this.config = {
@@ -87,10 +87,11 @@ define('layout', ['jquery', 'plot', 'cell'], function($, Plot, Cell) {
             return occupied;
         },
         /**
-        * Takes an array of plots names and checks to see if any are 
+        * Prior to the rendering or repositioning of a cell, this method,
+        * takes an array of the names of the plots involved and checks to see if any are 
         * currently occupied. Returns true if the specific plots are all
         * unoccupied and it's fine to put a new cell in or move an existing
-        * cell to that location.
+        * cell to that location. 
         */
         checkPosition: function(plots) {
             var that = this,
