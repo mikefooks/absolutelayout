@@ -1,27 +1,51 @@
 define('cell', ['jquery'], function($) {
 
     var Cell = function() {
+        /* The Plot object which corresponds to the topLeft values above */
         this.positionPlot = {};
-        this.cellInfo = {};
+
+        /** 
+        * The location(top, left) and dimensions of the cell
+        * expressed in columns and rows.
+        */
+        this.cellInfo = {
+            location: {},
+            dimensions: {}
+        };
+
+        /* The layout object of which this cell is a part. */
         this.layout = {};
+
+        /** 
+        * The location(top, left) and dimensions of the cell
+        * expressed as % or px.
+        */
         this.cssProps = {};
+
+        /* The unique id which will become the cell html's id attribute. */
         this.idName = '';
+
+        /* Class names which will become the cell html class attributes. */
         this.classNames = [];
+
+        /* The html container/wrapper with which the cell's layout
+        * object is associated. */
         this.container = {};
+
+        /** 
+        * A jquery object representing the cell, for appending and
+        * manipulating and such.
+        */
         this.$obj = {};
     };
 
     Cell.prototype = {
         initConfig: function(params, layout) {
-                /* The row and column for the top and leftmost plot the cell occupies */
-            var topleft = params.topLeft,
-                /* The dimensions, in rows and columns, of the new cell */
+            var topLeft = params.topLeft,
                 dimensionsIn = params.dimensionsIn,
-                /* The Plot object which corresponds to the topLeft values above */
-                positionPlot = layout.Plots[topleft[0] + '-' +topLeft[1]],
-                /* The width and height, in % or px, or the new cell */
+                positionPlot = layout.Plots[topLeft[0] + '-' +topLeft[1]],
+                /* There's some tight coupling going on here. Rethink. */
                 dimensionsProperty = layout.cellDimensions(dimensionsIn[0], dimensionsIn[1]),
-                /* The top left values, in % or px */
                 locationProperty = {
                     top: positionPlot.cssProps.top,
                     left: positionPlot.cssProps.left
