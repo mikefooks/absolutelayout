@@ -1,4 +1,4 @@
-define('layout', ['jquery', 'lodash', 'plot'], function($, _, Plot) {
+define('layout', ['jquery', 'plot', 'cell'], function($, Plot, Cell) {
 
     /**
     * The contructor for the layout object
