@@ -94,6 +94,35 @@ define(['layout',
 
     });
 
+    describe('Layout.cellDimensions', function() {
+        var testPlotDimensions,
+            testLayout = new Layout.Layout();
+            testLayout.initConfig({
+                fluid: true,
+                container: 'div.layout',
+                columns: 8,
+                rows: 8
+            });
+            testLayout.refresh();
+
+        beforeEach(function() {
+            testPlotDimensions = testLayout.cellDimensions(2, 3, testLayout);
+        });
+
+        afterEach(function() {
+            testPlotDimensions = null;
+        });
+
+        it('should be inthe proper format', function() {
+            expect(typeof testPlotDimensions).toBe('object');
+        });
+
+        it('should have the expected dimensions', function() {
+            expect(testPlotDimensions.width).toBe('37.5%');
+            expect(testPlotDimensions.height).toBe('25%');
+        });
+    });
+
     describe('Layout.getOccupied', function() {
 
         var testLayout,

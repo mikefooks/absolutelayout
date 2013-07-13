@@ -52,6 +52,26 @@ define('layout', ['jquery', 'plot', 'cell'], function($, Plot, Cell) {
             }
         },
         /**
+        * Finds the dimensions for a new plot or cell based on given dimensions
+        * in rows and columns.
+        */
+        cellDimensions: function(row, column) {
+            var dimensions = this.containerDimensions,
+                config = this.config;
+
+            if (this.config.fluid === true) {
+                return {
+                    width: ((100 / config.columns) * column) + '%',
+                    height: ((100 / config.rows) * row) + '%'
+                };
+            } else {
+                return {
+                    width: (dimensions.width / config.column) * columns,
+                    height: (dimensions.height / config.row) * rows
+                };
+            }
+        },
+        /**
         * Returns an array of all the plots that have the occupied
         * attribute set to true, on account of their being occupied
         * by a Cell.
