@@ -36,8 +36,8 @@ define(['layout',
                 fluid: true,
                 container: 'div.layout',
                 columns: 10,
-                rows: 10               
-            }).refresh();
+                rows: 10
+            });
         });
 
         afterEach(function() {
@@ -193,6 +193,31 @@ define(['layout',
 
         it('should return true when no specified plots are occupied', function() {
             expect(testLayout.checkPosition(['1-2', '2-2'])).toBe(true);
+        });
+    });
+
+    describe('Layout.getPlots', function() {
+        var testLayout,
+            outputtedPlots;
+
+        beforeEach(function() {
+            testLayout = new Layout.Layout();
+            testLayout.initConfig({
+                fluid: true,
+                container: 'div.layout',
+                columns: 8,
+                rows: 8
+            }).refresh();
+
+            outputtedPlots = testLayout.getPlots(2, 2, 3, 2)
+        });
+
+        afterEach(function() {
+            testLayout = outputtedPlots = null;
+        });
+
+        it('returned object should be correct', function() {
+            expect(outputtedPlots[0]).toBe('3-2');
         });
     });
 });

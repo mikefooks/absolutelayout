@@ -116,6 +116,23 @@ define('layout', ['jquery', 'plot', 'cell'], function($, Plot, Cell) {
 
             return renderFlag;
 
+        },
+        /**
+        * Returns an array containing the names of the plots that a theoretical
+        * cell with the inputted attributes would occupy.
+        */
+        getPlots: function(rows, columns, top, left) {
+            var plots = [],
+                onePlot;
+
+            for (var i = 0 ; i < rows; i += 1) {
+                for (var j = 0 ; j < columns; j += 1) {
+                    onePlot = (top + i) + '-' + (left + j);
+                    plots.push(onePlot);
+                }
+            }
+
+            return plots;
         }
     };
 
