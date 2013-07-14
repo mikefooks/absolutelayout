@@ -34,6 +34,8 @@ define('layout', ['jquery', 'plot', 'cell'], function($, Plot, Cell) {
                 height: this.config.container.height(),
                 width: this.config.container.width()
             };
+
+            return this;
         },
         /**
         * Creates all the plots, based on the config object's

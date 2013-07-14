@@ -60,6 +60,7 @@ define('cell', ['jquery'], function($) {
             this.cssProps = $.extend({}, dimensionsProperty, locationProperty);
             this.idName = params.idName;
 
+            /* adding classes from an array doesn't seem to be working */
             if (typeof params.classNames === 'string') {
                 this.classNames.push(params.classNames);
             } else if (Array.isArray(params.classNames)) {
@@ -70,6 +71,7 @@ define('cell', ['jquery'], function($) {
             this.$obj = $('<div></div>')
                 .attr('id', this.idName)
                 .addClass(this.classNames.join(' '))
+            /* bear in mind this will add inline styles. Not desirable. */
                 .css(this.cssProps)
                 .html('<p>' + this.idName + '</p>');
         }

@@ -28,23 +28,20 @@ define(['layout',
     });
 
     describe('Layout.initConfig', function() {
-        var fakeConfigObj,
-            testLayout;
+        var testLayout;
 
         beforeEach(function() {
-            fakeConfigObj = {
+            testLayout = new Layout.Layout();
+            testLayout.initConfig({
                 fluid: true,
                 container: 'div.layout',
                 columns: 10,
-                rows: 10
-            },
-            testLayout = new Layout.Layout();
-
-            testLayout.initConfig(fakeConfigObj);
+                rows: 10               
+            }).refresh();
         });
 
         afterEach(function() {
-            fakeConfigObj = testLayout = null;
+            testLayout = null;
         });
 
         it('should accept config object', function() {
@@ -64,24 +61,21 @@ define(['layout',
     });
 
     describe('Layout.refresh', function() {
-        var fakeDom = $(Wrapper),
-            fakeConfigObj,
-            testLayout;
+        var testLayout;
 
         beforeEach(function() {
-            fakeConfigObj = {
+            testLayout = new Layout.Layout();
+            testLayout.initConfig({
                 fluid: true,
                 container: 'div.layout',
                 columns: 8,
                 rows: 8
-            },
-            testLayout = new Layout.Layout();
-            testLayout.initConfig(fakeConfigObj);
-            testLayout.refresh();
+            /* Is chaining necessary or useful? Pros? Cons? */
+            }).refresh();
         });
 
         afterEach(function() {
-            fakeDom = fakeConfigObj = testLayout = null;
+            testLayout = null;
         });
 
         it('should register new plots in the Layout object', function() {
@@ -92,20 +86,26 @@ define(['layout',
             expect(Object.keys(testLayout.Plots)[35]).toBe('4-3');
         });
 
+        it('plots should have correct location information', function() {
+            expect(typeof testLayout.Plots['4-5'].location).toBe('object');
+            expect(testLayout.Plots['4-5'].cssProps.top).toBe('50%');
+            expect(testLayout.Plots['4-5'].cssProps.left).toBe('62.5%');
+        });
+
     });
 
     describe('Layout.cellDimensions', function() {
-        var testPlotDimensions,
+        var testLayout,
+            testPlotDimensions;
+
+        beforeEach(function() {
             testLayout = new Layout.Layout();
             testLayout.initConfig({
                 fluid: true,
                 container: 'div.layout',
                 columns: 8,
                 rows: 8
-            });
-            testLayout.refresh();
-
-        beforeEach(function() {
+            }).refresh();
             testPlotDimensions = testLayout.cellDimensions(2, 3, testLayout);
         });
 
@@ -130,24 +130,23 @@ define(['layout',
             occupiedPlots;
 
         beforeEach(function() {
-            testLayout = new Layout.Layout(),
-            fakeConfig = {
+            testLayout = new Layout.Layout();
+            testLayout.initConfig({
                 fluid: true,
                 container: 'div.layout',
                 columns: 5,
                 rows: 5
-            };
+            }).refresh();
 
-            testLayout.initConfig(fakeConfig);
-            testLayout.refresh();
             ['1-1', '1-2', '2-1', '2-2'].forEach(function(obj) {
                 testLayout.Plots[obj].occupied = true;
             });
+
             occupiedPlots = testLayout.getOccupied();
         });
 
         afterEach(function() {
-            testLayout = fakeConfig = occupiedPlots = null;
+            testLayout = occupiedPlots = null;
         });
 
         it('should return the correct number of plots', function() {
@@ -164,42 +163,36 @@ define(['layout',
             expect(occupiedPlots[2]).toBe('2-1');
             expect(occupiedPlots[3]).toBe('2-2');
         });
-
     });
 
     describe('Layout.checkPosition', function() {
-
-        var testLayout,
-            fakeConfig,
-            plots;
+        var testLayout;
 
         beforeEach(function() {
             testLayout = new Layout.Layout(),
-            fakeConfig = {
+
+            testLayout.initConfig({
                 fluid: true,
                 container: 'div.layout',
                 columns: 5,
                 rows: 5
-            };
+            }).refresh();
 
-            testLayout.initConfig(fakeConfig);
-            testLayout.refresh();
             ['3-3', '3-4', '4-3', '4-4'].forEach(function(obj) {
                 testLayout.Plots[obj].occupied = true;
             });
         });
 
         afterEach(function() {
-            testLayout = fakeConfig = null;
+            testLayout = null;
         });
 
         it('should return false when one or more specified plots is occupied', function() {
             expect(testLayout.checkPosition(['3-2', '3-3'])).toBe(false);
         });
 
-        it('should return true when no specific plots are occupied', function() {
+        it('should return true when no specified plots are occupied', function() {
             expect(testLayout.checkPosition(['1-2', '2-2'])).toBe(true);
         });
-
     });
 });
