@@ -89,7 +89,21 @@ define('layout', ['jquery', 'plot', 'cell'], function($, Plot, Cell) {
             return occupied;
         },
         /**
-        * Prior to the rendering or repositioning of a cell, this method,
+        * The opposite of the above method. Returns an array of all the plots that
+        * have their occupied attribute set to false.
+        */
+        getUnoccupied: function() {
+            var that = this,
+                unoccupied = $.grep(Object.keys(this.Plots), function(obj, idx) {
+                if (that.Plots[obj].occupied === false) {
+                    return obj;
+                }
+            });
+
+            return unoccupied;
+        },
+        /**
+        * Before rendering, repositioning or resizing a cell, this method
         * takes an array of the names of the plots involved and checks to see if any are 
         * currently occupied. Returns true if the specific plots are all
         * unoccupied and it's fine to put a new cell in or move an existing

@@ -128,17 +128,13 @@ define(['layout',
     describe('Layout.getOccupied', function() {
 
         var testLayout,
-            fakeConfig,
             occupiedPlots;
 
         beforeEach(function() {
             testLayout = new Layout();
-            testLayout.initConfig({
-                fluid: true,
-                container: 'div.layout',
-                columns: 5,
-                rows: 5
-            }).refresh();
+            testLayout.initConfig(
+                new ConfigObject(true, 'div.layout', 5, 5)
+            ).refresh();
 
             ['1-1', '1-2', '2-1', '2-2'].forEach(function(obj) {
                 testLayout.Plots[obj].occupied = true;
@@ -165,6 +161,45 @@ define(['layout',
             expect(occupiedPlots[2]).toBe('2-1');
             expect(occupiedPlots[3]).toBe('2-2');
         });
+    });
+
+    describe('Layout.getUnoccupied', function() {
+        var testLayout,
+            unoccupiedPlots,
+            fakeOccupiedPlots;
+
+        beforeEach(function() {
+            testLayout = new Layout();
+            testLayout.initConfig(
+                new ConfigObject(true, 'div.layout', 15, 15)
+            ).refresh();
+
+            fakeOccupiedPlots = Object.keys(testLayout.Plots).slice(5, 12);
+
+            fakeOccupiedPlots.forEach(function(plotName) {
+                testLayout.Plots[plotName].occupied = true;
+            });
+
+            unoccupiedPlots = testLayout.getUnoccupied();
+        });
+
+        afterEach(function() {
+            testLayout = unoccupiedPlots = fakeOccupiedPlots = null;
+        });
+
+        it('test structures working properly', function() {
+            expect(fakeOccupiedPlots.length).toBe(7);
+        });
+
+        it('should show all the plot unoccupied', function() {
+            expect(unoccupiedPlots.length).toBe(218);
+        });
+
+        it('missing cells are the ones you would expect', function() {
+            expect(unoccupiedPlots[4]).toBe('0-4');
+            expect(unoccupiedPlots[5]).toBe('0-12');
+        });
+
     });
 
     describe('Layout.checkPosition', function() {
