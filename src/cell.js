@@ -40,6 +40,9 @@ define('cell', ['jquery'], function($) {
     };
 
     Cell.prototype = {
+        /**
+        * Takes a config object and sets up the cell.
+        */
         initConfig: function(params, layout) {
             var topLeft = params.topLeft,
                 dimensionsIn = params.dimensionsIn,
@@ -74,6 +77,13 @@ define('cell', ['jquery'], function($) {
             /* bear in mind this will add inline styles. Not desirable. */
                 .css(this.cssProps)
                 .html('<p>' + this.idName + '</p>');
+        },
+        /**
+        * Takes the $obj and actually appends it to the layout's configured
+        * container.
+        */
+        render: function() {
+            this.container.append(this.$obj);
         }
     };
 

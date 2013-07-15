@@ -1,4 +1,7 @@
-define(['layout', 'cell'], function(Layout, Cell) {
+define(['layout',
+        'cell',
+        'text!spec/fixtures/wrapper_fixture.html'],
+        function(Layout, Cell, Wrapper) {
 
     describe('Cell - instantiation and object structure', function() {
         var testCell,
@@ -70,6 +73,55 @@ define(['layout', 'cell'], function(Layout, Cell) {
 
         it('$obj property should look good', function() {
             expect(testCell.$obj).toHaveClass('test-a-roo');
+        });
+    });
+
+    describe('Cell.render', function() {
+        var testLayout,
+            testCell,
+            layoutContainer;
+
+        beforeEach(function() {
+            testLayout = new Layout();
+            testLayout.initConfig({
+                fluid: true,
+                columns: 15,
+                rows: 15
+            }).refresh();
+            testLayout.config.container = $(Wrapper).find('div.layout');
+
+            testCell = new Cell();
+            testCell.initConfig({
+                topLeft: [2, 2],
+                dimensionsIn: [8, 8],
+                idName: 'test-cell',
+                classNames: 'neat-o'
+            }, testLayout);
+
+            testCell.render();
+
+            layoutContainer = testLayout.config.container;
+        });
+
+        afterEach(function() {
+            testLayout = testCell = null;
+        });
+
+        it('html fixture should be properly loaded', function() {
+            expect(layoutContainer).toBe('div.layout');
+            expect(layoutContainer).toHaveClass('layout');
+        });
+
+        it('cell should have been appended to fake dom', function() {
+            expect(layoutContainer).toContain('div#test-cell');
+        });
+
+        it('rendered cell has correct style attributes', function() {
+            expect($(layoutContainer).find('div#test-cell')).toHaveCss({height: '53.333333333333336%'});
+        });
+
+        it('rendered cell has right class names', function() {
+            expect($(layoutContainer).find('div#test-cell')).toHaveClass('neat-o');
         });
     });
 
