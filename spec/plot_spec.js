@@ -16,7 +16,7 @@ define(['layout', 'plot'], function(Layout, Plot) {
                 columns: 7
             };
 
-            testLayout = new Layout.Layout();
+            testLayout = new Layout();
             testLayout.initConfig(fakeConfig);
 
             testPlot_1 = new Plot({

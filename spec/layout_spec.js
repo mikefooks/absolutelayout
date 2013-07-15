@@ -5,11 +5,22 @@ define(['layout',
 
     "use strict";
 
+    /**
+    * Just a little config object class so I don't have to be
+    * constantly declaring literals.
+    */
+    var ConfigObject = function(fluid, container, columns, rows) {
+        this.fluid = fluid;
+        this.container = container;
+        this.columns = columns;
+        this.rows = rows;
+    };
+
     describe('Layout object form and instantiation', function() {
         var testLayout;
 
         beforeEach(function() {
-            testLayout = new Layout.Layout();
+            testLayout = new Layout();
         });
 
         afterEach(function() {
@@ -31,13 +42,10 @@ define(['layout',
         var testLayout;
 
         beforeEach(function() {
-            testLayout = new Layout.Layout();
-            testLayout.initConfig({
-                fluid: true,
-                container: 'div.layout',
-                columns: 10,
-                rows: 10
-            });
+            testLayout = new Layout();
+            testLayout.initConfig(
+                new ConfigObject(true, 'div.layout', 10, 10)
+            );
         });
 
         afterEach(function() {
@@ -64,14 +72,11 @@ define(['layout',
         var testLayout;
 
         beforeEach(function() {
-            testLayout = new Layout.Layout();
-            testLayout.initConfig({
-                fluid: true,
-                container: 'div.layout',
-                columns: 8,
-                rows: 8
+            testLayout = new Layout();
+            testLayout.initConfig(
+                new ConfigObject(true, 'div.layout', 8, 8)
             /* Is chaining necessary or useful? Pros? Cons? */
-            }).refresh();
+            ).refresh();
         });
 
         afterEach(function() {
@@ -99,13 +104,10 @@ define(['layout',
             testPlotDimensions;
 
         beforeEach(function() {
-            testLayout = new Layout.Layout();
-            testLayout.initConfig({
-                fluid: true,
-                container: 'div.layout',
-                columns: 8,
-                rows: 8
-            }).refresh();
+            testLayout = new Layout();
+            testLayout.initConfig(
+                new ConfigObject(true, 'div.layout', 8, 8)
+            ).refresh();
             testPlotDimensions = testLayout.cellDimensions(2, 3, testLayout);
         });
 
@@ -130,7 +132,7 @@ define(['layout',
             occupiedPlots;
 
         beforeEach(function() {
-            testLayout = new Layout.Layout();
+            testLayout = new Layout();
             testLayout.initConfig({
                 fluid: true,
                 container: 'div.layout',
@@ -169,7 +171,7 @@ define(['layout',
         var testLayout;
 
         beforeEach(function() {
-            testLayout = new Layout.Layout(),
+            testLayout = new Layout(),
 
             testLayout.initConfig({
                 fluid: true,
@@ -198,26 +200,37 @@ define(['layout',
 
     describe('Layout.getPlots', function() {
         var testLayout,
-            outputtedPlots;
+            outputPlots;
 
         beforeEach(function() {
-            testLayout = new Layout.Layout();
-            testLayout.initConfig({
-                fluid: true,
-                container: 'div.layout',
-                columns: 8,
-                rows: 8
-            }).refresh();
+            testLayout = new Layout();
+            testLayout.initConfig(
+                new ConfigObject(true, 'div.layout', 8, 8)
+            ).refresh();
 
-            outputtedPlots = testLayout.getPlots(2, 2, 3, 2)
+            outputPlots = testLayout.getPlots(2, 2, 3, 2);
         });
 
         afterEach(function() {
-            testLayout = outputtedPlots = null;
+            testLayout = outputPlots = null;
         });
 
-        it('returned object should be correct', function() {
-            expect(outputtedPlots[0]).toBe('3-2');
+        it('should have the correct values', function() {
+            expect(outputPlots[0]).toBe('3-2');
+            expect(outputPlots[1]).toBe('3-3');
         });
+
+        it('returned object should contain the right number of plots', function() {
+            expect(outputPlots.length).toBe(4);
+        });
+    });
+
+    describe('Layout.addCell', function() {
+        var testLayout;
+
+        beforeEach(function() {
+            testLayout = new Layout();
+        });
+
     });
 });

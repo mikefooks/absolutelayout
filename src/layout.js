@@ -38,7 +38,7 @@ define('layout', ['jquery', 'plot', 'cell'], function($, Plot, Cell) {
             return this;
         },
         /**
-        * Creates all the plots, based on the config object's
+        * Creates all the necessary Plot objects, based on the config object's
         * rows and columns
         */
         refresh: function() {
@@ -81,10 +81,10 @@ define('layout', ['jquery', 'plot', 'cell'], function($, Plot, Cell) {
         getOccupied: function() {
             var that = this,
                 occupied = $.grep(Object.keys(this.Plots), function(obj, idx) {
-                if (that.Plots[obj].occupied === true) {
-                    return obj;
-                }
-            });
+                    if (that.Plots[obj].occupied === true) {
+                        return obj;
+                    }
+                });
 
             return occupied;
         },
@@ -136,8 +136,6 @@ define('layout', ['jquery', 'plot', 'cell'], function($, Plot, Cell) {
         }
     };
 
-    return {
-        Layout: Layout
-    };
+    return Layout;
 
 });
