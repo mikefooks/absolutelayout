@@ -147,6 +147,40 @@ define('layout', ['jquery', 'plot', 'cell'], function($, Plot, Cell) {
             }
 
             return plots;
+        },
+        /**
+        * Creates a new cell, registers it with the Layout's Cells object, and
+        * renders it in the element specified in config.container.
+        */
+        addCell: function(dimensionsIn, topLeft, idName, classNames) {
+            var that = this,
+                occupiedPlots = [],
+                renderFlag = true,
+                occupiedPlot,
+                newCell = new Cell(),
+                plots = this.getPlots(dimensionsIn[0], dimensionsIn[1], topLeft[0], topLeft[1]);
+
+            newCell.initConfig({
+                dimensionsIn: dimensionsIn,
+                topLeft: topLeft,
+                idName: idName,
+                classNames: classNames
+            }, this);
+
+            if (!this.checkPosition(plots)) {
+                console.log('cannot render a new cell on an occupied plot!');
+                return;
+            } else {
+                plots.forEach(function(obj, idx) {
+                    that.Plots[obj].occupied = true;
+                });
+
+                this.Cells[newCell.idName] = newCell;
+
+                newCell.occupiedPlots = plots;
+
+                newCell.render();
+            }
         }
     };
 

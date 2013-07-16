@@ -112,6 +112,10 @@ define(['layout',
             expect(layoutContainer).toHaveClass('layout');
         });
 
+        it('cell should have layout container configured properly', function() {
+            expect(testCell.container).toBe(testLayout.config.container);
+        });
+
         it('cell should have been appended to fake dom', function() {
             expect(layoutContainer).toContain('div#test-cell');
         });
