@@ -8,7 +8,7 @@ define(['layout',
             testCellKeys;
 
         beforeEach(function() {
-            testCell = new Cell();
+            testCell = new Cell.Cell();
             testCellKeys = Object.keys(testCell);
         });
 
@@ -21,13 +21,13 @@ define(['layout',
         });
 
         it('should have the right number of properties', function() {
-            expect(testCellKeys.length).toBe(8);
+            expect(testCellKeys.length).toBe(6);
         });
 
         it('should have all the correct properties', function() {
             expect(testCellKeys[0]).toBe('positionPlot');
-            expect(testCellKeys[4]).toBe('idName');
-            expect(testCellKeys[7]).toBe('$obj');
+            expect(testCellKeys[2]).toBe('layout');
+            expect(testCellKeys[5]).toBe('$obj');
         });
 
     });
@@ -44,13 +44,11 @@ define(['layout',
             }).refresh();
 
         beforeEach(function() {
-            testCell = new Cell();
-            testCell.initConfig({
-                topLeft: [3, 4],
-                dimensionsIn: [2, 3],
-                classNames: 'test-a-roo',
-                idName: 'test-cell'
-            }, testLayout);
+            testCell = new Cell.Cell();
+            testCell.initConfig(
+                new Cell.CellInfo(3, 4, 2, 3, 'test-cell', 'test-a-roo'),
+                testLayout
+            );
         });
 
         afterEach(function() {
@@ -58,17 +56,17 @@ define(['layout',
         });
 
         it('should have cellInfo attributes correctly assigned', function() {
-            expect(testCell.cellInfo.location[0]).toBe(3);
-            expect(testCell.cellInfo.location[1]).toBe(4);
-            expect(testCell.cellInfo.dimensions[0]).toBe(2);
-            expect(testCell.cellInfo.dimensions[1]).toBe(3);
+            expect(testCell.cellInfo.top).toBe(3);
+            expect(testCell.cellInfo.left).toBe(4);
+            expect(testCell.cellInfo.height).toBe(2);
+            expect(testCell.cellInfo.width).toBe(3);
         });
 
         it('should have cssProps attribute correctly assigned', function() {
             expect(testCell.cssProps.top).toBe('30%');
             expect(testCell.cssProps.left).toBe('40%');
-            expect(testCell.cssProps.width).toBe('30%');
             expect(testCell.cssProps.height).toBe('20%');
+            expect(testCell.cssProps.width).toBe('30%');
         });
 
         it('$obj property should look good', function() {
@@ -90,13 +88,11 @@ define(['layout',
             }).refresh();
             testLayout.config.container = $(Wrapper).find('div.layout');
 
-            testCell = new Cell();
-            testCell.initConfig({
-                topLeft: [2, 2],
-                dimensionsIn: [8, 8],
-                idName: 'test-cell',
-                classNames: 'neat-o'
-            }, testLayout);
+            testCell = new Cell.Cell();
+            testCell.initConfig(
+                new Cell.CellInfo(2, 2, 8, 8, 'test-cell', 'neat-o'),
+                testLayout
+            );
 
             testCell.render();
 
@@ -128,5 +124,28 @@ define(['layout',
             expect($(layoutContainer).find('div#test-cell')).toHaveClass('neat-o');
         });
     });
+
+    describe('Cell.reposition', function() {
+        var testLayout,
+            testCell,
+            layoutContainer;
+
+        beforeEach(function() {
+            testLayout = new Layout();
+            testLayout.initConfig(
+                new ConfigObject(true, 'div.layout', 10, 10)
+            ).refresh();
+
+            testLayout.config.container = $(Wrapper).find('div.layout');
+
+            testCell = new Cell();
+            testCell.initConfig({
+                topLeft: [0, 0],
+                dimensionsIn: [2, 2],
+                idName: 'test-cell',
+                classNames: 'another-test'
+            });
+        });
+    }); 
 
 });

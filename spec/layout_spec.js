@@ -243,7 +243,7 @@ define(['layout',
                 new ConfigObject(true, 'div.layout', 8, 8)
             ).refresh();
 
-            outputPlots = testLayout.getPlots(2, 2, 3, 2);
+            outputPlots = testLayout.getPlots(3, 2, 2, 2);
         });
 
         afterEach(function() {
@@ -278,19 +278,19 @@ define(['layout',
 
         it('getPlots should be called from the addCell method', function() {
             spyOn(testLayout, 'getPlots').andCallThrough();
-            testLayout.addCell([2, 2], [2, 3], 'testCell', 'className-here');
+            testLayout.addCell(2, 2, 2, 3, 'testCell', 'className-here');
             expect(testLayout.getPlots).toHaveBeenCalled();
         });
 
         it('new cell should be registered with the layout Cells object', function() {
-            testLayout.addCell([2, 3], [3, 4], 'testCell', 'className-here');
+            testLayout.addCell(2, 3, 3, 4, 'testCell', 'className-here');
             cellKeys = Object.keys(testLayout.Cells);
             expect(cellKeys.length).toBe(1);
             expect(cellKeys[0]).toBe('testCell');
         });
 
         it('new cell should have been rendered to the fake dom.', function() {
-            testLayout.addCell([2, 2], [2, 3], 'testCell', 'className-here');
+            testLayout.addCell(2, 2, 2, 3, 'testCell', 'className-here');
             expect(testLayout.config.container).toContain('div#testCell');
             expect($(testLayout.config.container).find('div#testCell')).toHaveClass('className-here');
             expect($(testLayout.config.container).find('div#testCell')).toHaveCss({height: '20%'});

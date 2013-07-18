@@ -1,5 +1,22 @@
 define('cell', ['jquery'], function($) {
 
+    /** 
+    * Contains most basic cell information. Parameters expressed
+    * in rows and columns.
+    */
+    var CellInfo = function(top, left, height, width, idName, classNames) {
+        /* number of rows from the topmost edge of the layout */
+        this.top = top;
+        /* number of columns from the leftmost edge of the layout */
+        this.left = left;
+        /* height in rows */
+        this.height = height;
+        /* width in columns */
+        this.width = width;
+        this.idName = idName;
+        this.classNames = classNames;
+    };
+
     var Cell = function() {
         /* The Plot object which corresponds to the topLeft values above */
         this.positionPlot = {};
@@ -8,10 +25,7 @@ define('cell', ['jquery'], function($) {
         * The location(top, left) and dimensions of the cell
         * expressed in columns and rows.
         */
-        this.cellInfo = {
-            location: {},
-            dimensions: {}
-        };
+        this.cellInfo = {};
 
         /* The layout object of which this cell is a part. */
         this.layout = {};
@@ -21,12 +35,6 @@ define('cell', ['jquery'], function($) {
         * expressed as % or px.
         */
         this.cssProps = {};
-
-        /* The unique id which will become the cell html's id attribute. */
-        this.idName = '';
-
-        /* Class names which will become the cell html class attributes. */
-        this.classNames = [];
 
         /* The html container/wrapper with which the cell's layout
         * object is associated. */
@@ -43,40 +51,25 @@ define('cell', ['jquery'], function($) {
         /**
         * Takes a config object and sets up the cell.
         */
-        initConfig: function(params, layout) {
-            var topLeft = params.topLeft,
-                dimensionsIn = params.dimensionsIn,
-                positionPlot = layout.Plots[topLeft[0] + '-' +topLeft[1]],
-                /* There's some tight coupling going on here. Rethink. */
-                dimensionsProperty = layout.cellDimensions(dimensionsIn[0], dimensionsIn[1]),
-                locationProperty = {
+        initConfig: function(cellInfoObj, layout) {
+            var positionPlot = layout.Plots[cellInfoObj.top + '-' + cellInfoObj.left],
+                dimensions = layout.cellDimensions(cellInfoObj.height, cellInfoObj.width),
+                location = {
                     top: positionPlot.cssProps.top,
                     left: positionPlot.cssProps.left
                 };
 
             this.positionPlot = positionPlot;
-            this.cellInfo = {
-                location: topLeft,
-                dimensions: dimensionsIn
-            };
+            this.cellInfo = cellInfoObj;
             this.layout = layout;
-            this.cssProps = $.extend({}, dimensionsProperty, locationProperty);
-            this.idName = params.idName;
-
-            /* adding classes from an array doesn't seem to be working */
-            if (typeof params.classNames === 'string') {
-                this.classNames.push(params.classNames);
-            } else if (Array.isArray(params.classNames)) {
-                this.classNames.concat(params.classNames);
-            }
+            this.cssProps = $.extend({}, dimensions, location);
 
             this.container = layout.config.container;
             this.$obj = $('<div></div>')
-                .attr('id', this.idName)
-                .addClass(this.classNames.join(' '))
-            /* bear in mind this will add inline styles. Not desirable. */
+                .attr('id', this.cellInfo.idName)
+                .addClass(this.cellInfo.classNames)
                 .css(this.cssProps)
-                .html('<p>' + this.idName + '</p>');
+                .html('<p>' + this.cellInfo.idName + '</p>');
         },
         /**
         * Takes the $obj and actually appends it to the layout's configured
@@ -84,9 +77,57 @@ define('cell', ['jquery'], function($) {
         */
         render: function() {
             this.container.append(this.$obj);
+        },
+        /**
+        * Repositions a cell on the layout, and adjusts all of its internal 
+        * attributes to reflect that.
+        */
+        reposition: function(newPosition) {
+        var that = this,
+            newPlots = this.layout.getPlots(this.cellInfo.dim[0], this.cellInfo.dim[1], newPosition[0], newPosition[1]),
+            adjustedPlots;
+
+        // Creates an array of new occupied plots, minus the ones which intersect from
+        // the cell's previous position, to avoid conflicts with the render flag.
+        adjustedPlots = newPlots.filter(function(obj, idx) {
+            if (that.occupiedPlots.indexOf(obj) === -1) {
+                return obj;
+            }
+        });
+
+        if (this.layout.checkPosition(adjustedPlots)) {
+
+            this.occupiedPlots.forEach(function(plot) {
+                that.layout.Plots[plot].occupied = false;
+            });
+
+            newPlots.forEach(function(plot) {
+                that.layout.Plots[plot].occupied = true;
+            });
+
+            this.occupiedPlots = newPlots;
+            this.cellInfo.loc = newPosition;
+            this.positionPlot = this.layout.Plots[newPosition[0] + '-' + newPosition[1]];
+            this.cssProps = $.extend({},
+                this.layout.cellDimensions(this.cellInfo.dim[0], this.cellInfo.dim[1]),
+                {
+                    top: this.positionPlot.cssProps.top,
+                    left: this.positionPlot.cssProps.left
+                }
+            );
+
+            this.$obj.css(this.cssProps);
+
+        } else {
+
+            console.log("renderFlag returned false. something is in the way");
         }
+    }
     };
 
-    return Cell;
+    return {
+        Cell: Cell,
+        CellInfo: CellInfo
+    };
 
 });

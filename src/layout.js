@@ -135,7 +135,7 @@ define('layout', ['jquery', 'plot', 'cell'], function($, Plot, Cell) {
         * Returns an array containing the names of the plots that a theoretical
         * cell with the inputted attributes would occupy.
         */
-        getPlots: function(rows, columns, top, left) {
+        getPlots: function(top, left, rows, columns) {
             var plots = [],
                 onePlot;
 
@@ -152,20 +152,14 @@ define('layout', ['jquery', 'plot', 'cell'], function($, Plot, Cell) {
         * Creates a new cell, registers it with the Layout's Cells object, and
         * renders it in the element specified in config.container.
         */
-        addCell: function(dimensionsIn, topLeft, idName, classNames) {
+        addCell: function(top, left, height, width, idName, classNames) {
             var that = this,
-                occupiedPlots = [],
-                renderFlag = true,
-                occupiedPlot,
-                newCell = new Cell(),
-                plots = this.getPlots(dimensionsIn[0], dimensionsIn[1], topLeft[0], topLeft[1]);
+                newCell = new Cell.Cell(),
+                plots = this.getPlots(top, left, height, width);
 
-            newCell.initConfig({
-                dimensionsIn: dimensionsIn,
-                topLeft: topLeft,
-                idName: idName,
-                classNames: classNames
-            }, this);
+            newCell.initConfig(
+                new Cell.CellInfo(top, left, height, width, idName, classNames),
+            this);
 
             if (!this.checkPosition(plots)) {
                 console.log('cannot render a new cell on an occupied plot!');
@@ -175,7 +169,7 @@ define('layout', ['jquery', 'plot', 'cell'], function($, Plot, Cell) {
                     that.Plots[obj].occupied = true;
                 });
 
-                this.Cells[newCell.idName] = newCell;
+                this.Cells[newCell.cellInfo.idName] = newCell;
 
                 newCell.occupiedPlots = plots;
 
