@@ -21,13 +21,13 @@ define(['layout',
         });
 
         it('should have the right number of properties', function() {
-            expect(testCellKeys.length).toBe(6);
+            expect(testCellKeys.length).toBe(7);
         });
 
         it('should have all the correct properties', function() {
             expect(testCellKeys[0]).toBe('positionPlot');
-            expect(testCellKeys[2]).toBe('layout');
-            expect(testCellKeys[5]).toBe('$obj');
+            expect(testCellKeys[2]).toBe('cellInfo');
+            expect(testCellKeys[5]).toBe('container');
         });
 
     });
@@ -127,25 +127,52 @@ define(['layout',
 
     describe('Cell.reposition', function() {
         var testLayout,
-            testCell,
-            layoutContainer;
+            testCell;
 
         beforeEach(function() {
             testLayout = new Layout();
-            testLayout.initConfig(
-                new ConfigObject(true, 'div.layout', 10, 10)
-            ).refresh();
+            testLayout.initConfig({
+                fluid: true,
+                container: 'div.layout',
+                rows: 10,
+                columns: 10
+            }).refresh();
 
             testLayout.config.container = $(Wrapper).find('div.layout');
 
-            testCell = new Cell();
-            testCell.initConfig({
-                topLeft: [0, 0],
-                dimensionsIn: [2, 2],
-                idName: 'test-cell',
-                classNames: 'another-test'
-            });
-        });
-    }); 
+            testLayout.addCell(0, 0, 2, 2, 'testCell', 'classHere');
 
+            testCell = testLayout.Cells.testCell;
+        });
+
+        afterEach(function() {
+            testCell = testLayout = null;
+        });
+
+        it('layout.getOccupied should work correctly', function() {
+            expect(testLayout.getOccupied()[0]).toBe('0-0');
+            expect(testLayout.getOccupied().length).toBe(4);
+            testCell.reposition(1, 1);
+            expect(testLayout.getOccupied()[0]).toBe('1-1');
+            expect(testLayout.getOccupied().length).toBe(4);
+        });
+
+        it('new cell attributes should reflect change in position', function() {
+            expect(testCell.cellInfo.top).toBe(0);
+            expect(testCell.cellInfo.left).toBe(0);
+            expect(testCell.cellInfo.height).toBe(2);
+            expect(testCell.cellInfo.width).toBe(2);
+            testCell.reposition(4, 4);
+            expect(testCell.cellInfo.top).toBe(4);
+            expect(testCell.cellInfo.left).toBe(4);
+        });
+
+        it('occupiedPlots attribute updated correctly', function() {
+            expect(testCell.occupiedPlots[0]).toBe('0-0');
+            expect(testCell.occupiedPlots.length).toBe(4);
+            testCell.reposition(3, 3);
+            expect(testCell.occupiedPlots[0]).toBe('3-3');
+            expect(testCell.occupiedPlots.length).toBe(4);
+        });
+    });
 });
