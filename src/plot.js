@@ -1,12 +1,10 @@
 define('plot', [], function() {
 
-    var Plot = function(params, layout) {
-        var plotDimensions = layout.cellDimensions(params.row, params.column);
+    var Plot = function(plotInfoObj, layout) {
+        var plotDimensions = layout.cellDimensions(plotInfoObj.row, plotInfoObj.column);
 
-        this.location = {
-            row: params.row,
-            column: params.column
-        };
+        this.location = plotInfoObj;
+
         this.cssProps = {
             position: 'absolute',
             left: plotDimensions.width,
