@@ -127,7 +127,8 @@ define(['layout',
 
     describe('Cell.reposition', function() {
         var testLayout,
-            testCell;
+            testCell,
+            fakeLayoutContainer;
 
         beforeEach(function() {
             testLayout = new Layout();
@@ -139,10 +140,10 @@ define(['layout',
             }).refresh();
 
             testLayout.config.container = $(Wrapper).find('div.layout');
-
             testLayout.addCell(0, 0, 2, 2, 'testCell', 'classHere');
-
             testCell = testLayout.Cells.testCell;
+
+            fakeLayoutContainer = testLayout.config.container;
         });
 
         afterEach(function() {
@@ -173,6 +174,29 @@ define(['layout',
             testCell.reposition(3, 3);
             expect(testCell.occupiedPlots[0]).toBe('3-3');
             expect(testCell.occupiedPlots.length).toBe(4);
+        });
+
+        it('cssProps updated correctly', function() {
+            expect(testCell.cssProps.top).toBe('0%');
+            expect(testCell.cssProps.left).toBe('0%');
+            testCell.reposition(3, 3);
+            expect(testCell.cssProps.top).toBe('30%');
+            expect(testCell.cssProps.left).toBe('30%');
+        });
+
+        it('fake dom should be updated accordingly', function() {
+            expect(fakeLayoutContainer).toContain('div#testCell');
+            expect($(fakeLayoutContainer).find('div#testCell'))
+                .toHaveAttr('style', 'width: 20%; height: 20%; top: 0%; left: 0%; ');
+            testCell.reposition(2, 2);
+            expect($(fakeLayoutContainer).find('div#testCell'))
+                .toHaveAttr('style', 'width: 20%; height: 20%; top: 20%; left: 20%; ');
+        });
+
+        it('positionPlot updated correctly', function() {
+            expect(testCell.positionPlot.location.row).toBe(0);
+            testCell.reposition(3, 3);
+            expect(testCell.positionPlot.location.row).toBe(3);
         });
     });
 });
