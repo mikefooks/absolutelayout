@@ -244,5 +244,13 @@ define(['layout',
             expect(testCell.cssProps.height).toBe('50%');
         });
 
+        it('should have been resized on the fake dom', function() {
+            expect($(layoutContainer).find('div#testCell'))
+                .toHaveAttr('style', 'width: 33.333333333333336%; height: 33.333333333333336%; top: 33.333333333333336%; left: 33.333333333333336%; ');
+            testCell.resize(6, 6);
+            expect($(layoutContainer).find('div#testCell'))
+                .toHaveAttr('style', 'width: 50%; height: 50%; top: 33.333333333333336%; left: 33.333333333333336%; ');
+        });
+
     });
 });
