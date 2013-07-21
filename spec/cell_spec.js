@@ -128,7 +128,7 @@ define(['layout',
     describe('Cell.reposition', function() {
         var testLayout,
             testCell,
-            fakeLayoutContainer;
+            layoutContainer;
 
         beforeEach(function() {
             testLayout = new Layout();
@@ -143,7 +143,7 @@ define(['layout',
             testLayout.addCell(0, 0, 2, 2, 'testCell', 'classHere');
             testCell = testLayout.Cells.testCell;
 
-            fakeLayoutContainer = testLayout.config.container;
+            layoutContainer = testLayout.config.container;
         });
 
         afterEach(function() {
@@ -185,11 +185,11 @@ define(['layout',
         });
 
         it('fake dom should be updated accordingly', function() {
-            expect(fakeLayoutContainer).toContain('div#testCell');
-            expect($(fakeLayoutContainer).find('div#testCell'))
+            expect(layoutContainer).toContain('div#testCell');
+            expect($(layoutContainer).find('div#testCell'))
                 .toHaveAttr('style', 'width: 20%; height: 20%; top: 0%; left: 0%; ');
             testCell.reposition(2, 2);
-            expect($(fakeLayoutContainer).find('div#testCell'))
+            expect($(layoutContainer).find('div#testCell'))
                 .toHaveAttr('style', 'width: 20%; height: 20%; top: 20%; left: 20%; ');
         });
 
@@ -198,5 +198,51 @@ define(['layout',
             testCell.reposition(3, 3);
             expect(testCell.positionPlot.location.row).toBe(3);
         });
+
+    });
+
+    describe('Cell.resize', function() {
+        var testLayout,
+            testCell,
+            layoutContainer;
+
+        beforeEach(function() {
+            testLayout = new Layout();
+            testLayout.initConfig({
+                fluid: true,
+                container: 'div.layout',
+                rows: 12,
+                columns: 12
+            }).refresh();
+
+            testLayout.config.container = $(Wrapper).find('div.layout');
+            layoutContainer = testLayout.config.container;
+
+            testLayout.addCell(4, 4, 4, 4, 'testCell', 'testCellClass');
+
+            testCell = testLayout.Cells.testCell;
+
+        });
+
+        afterEach(function() {
+            testLayout = testCell = layoutContainer = null;
+        });
+
+        it('cell moved should be reflected in cellInfo', function() {
+            expect(testCell.cellInfo.width).toBe(4);
+            expect(testCell.cellInfo.height).toBe(4);
+            testCell.resize(6, 6);
+            expect(testCell.cellInfo.width).toBe(6);
+            expect(testCell.cellInfo.height).toBe(6);
+        });
+
+        it('cell moved should be reflected in cssProps', function() {
+            expect(testCell.cssProps.width).toBe('33.333333333333336%');
+            expect(testCell.cssProps.height).toBe('33.333333333333336%');
+            testCell.resize(6, 6);
+            expect(testCell.cssProps.width).toBe('50%');
+            expect(testCell.cssProps.height).toBe('50%');
+        });
+
     });
 });

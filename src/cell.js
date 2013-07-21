@@ -138,6 +138,45 @@ define('cell', ['jquery'], function($) {
 
                 console.log("renderFlag returned false. something is in the way");
             }
+        },
+        resize: function(height, width) {
+            var that = this,
+                newPlots = this.layout.getPlots(this.cellInfo.top, this.cellInfo.left, height, width),
+                adjustedPlots;
+
+            adjustedPlots = newPlots.filter(function(obj, idx) {
+                if (that.occupiedPlots.indexOf(obj) === -1) {
+                    return obj;
+                }
+            });
+
+            if (this.layout.checkPosition(adjustedPlots)) {
+
+                this.occupiedPlots.forEach(function(plot) {
+                    that.layout.Plots[plot].occupied = false;
+                });
+
+                newPlots.forEach(function(plot) {
+                    that.layout.Plots[plot].occupied = true;
+                });
+
+                this.occupiedPlots = newPlots;
+                this.cellInfo.height = height;
+                this.cellInfo.width = width;
+                this.cssProps = $.extend({},
+                    this.layout.cellDimensions(this.cellInfo.height, this.cellInfo.width),
+                    {
+                        top: this.positionPlot.cssProps.top,
+                        left: this.positionPlot.cssProps.left
+                    }
+                );
+
+                this.$obj.css(this.cssProps);
+
+            } else {
+
+                console.log("renderFlag returned false. something is in the way");
+            }
         }
     };
 
