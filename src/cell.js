@@ -91,8 +91,7 @@ define('cell', ['jquery'], function($) {
             this.container.append(this.$obj);
         },
         /**
-        * Repositions a cell on the layout, and adjusts all of its internal 
-        * attributes to reflect that.
+        * Repositions a cell on the layout.
         */
         reposition: function(top, left) {
             var that = this,
@@ -111,34 +110,21 @@ define('cell', ['jquery'], function($) {
             });
 
             if (this.layout.checkPosition(adjustedPlots)) {
-
-                this.occupiedPlots.forEach(function(plot) {
-                    that.layout.Plots[plot].occupied = false;
-                });
-
-                newPlots.forEach(function(plot) {
-                    that.layout.Plots[plot].occupied = true;
-                });
-
-                this.occupiedPlots = newPlots;
                 this.cellInfo.top = top;
                 this.cellInfo.left = left;
                 this.positionPlot = this.layout.Plots[top + '-' + left];
-                this.cssProps = $.extend({},
-                    this.layout.cellDimensions(this.cellInfo.height, this.cellInfo.width),
-                    {
-                        top: this.positionPlot.cssProps.top,
-                        left: this.positionPlot.cssProps.left
-                    }
-                );
 
-                this.$obj.css(this.cssProps);
+                this.modify(newPlots);
 
             } else {
 
                 console.log("renderFlag returned false. something is in the way");
             }
         },
+        /** 
+        * Resizes a cell. So far only expand and contracts along the bottom and
+        * right edges of the cell.
+        */
         resize: function(height, width) {
             var that = this,
                 newPlots = this.layout.getPlots(this.cellInfo.top, this.cellInfo.left, height, width),
@@ -151,32 +137,41 @@ define('cell', ['jquery'], function($) {
             });
 
             if (this.layout.checkPosition(adjustedPlots)) {
-
-                this.occupiedPlots.forEach(function(plot) {
-                    that.layout.Plots[plot].occupied = false;
-                });
-
-                newPlots.forEach(function(plot) {
-                    that.layout.Plots[plot].occupied = true;
-                });
-
-                this.occupiedPlots = newPlots;
                 this.cellInfo.height = height;
                 this.cellInfo.width = width;
-                this.cssProps = $.extend({},
-                    this.layout.cellDimensions(this.cellInfo.height, this.cellInfo.width),
-                    {
-                        top: this.positionPlot.cssProps.top,
-                        left: this.positionPlot.cssProps.left
-                    }
-                );
 
-                this.$obj.css(this.cssProps);
+                this.modify(newPlots);
 
             } else {
 
                 console.log("renderFlag returned false. something is in the way");
             }
+        },
+        /**
+        * If the reposition or resize checks out, modify actually makes the
+        * internal changes necessary to refresh the cell's attributes.
+        */
+        modify: function(newPlots) {
+            var that = this;
+            this.occupiedPlots.forEach(function(plot) {
+                that.layout.Plots[plot].occupied = false;
+            });
+
+            newPlots.forEach(function(plot) {
+                that.layout.Plots[plot].occupied = true;
+            });
+
+            this.occupiedPlots = newPlots;
+            this.cssProps = $.extend({},
+                this.layout.cellDimensions(this.cellInfo.height, this.cellInfo.width),
+                {
+                    top: this.positionPlot.cssProps.top,
+                    left: this.positionPlot.cssProps.left
+                }
+            );
+
+            this.$obj.css(this.cssProps);
+
         }
     };
 
