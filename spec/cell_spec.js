@@ -199,6 +199,19 @@ define(['layout',
             expect(testCell.positionPlot.location.row).toBe(3);
         });
 
+        it('should call to checkPosition', function() {
+            spyOn(testLayout, 'checkPosition').andCallThrough();
+            testCell.reposition(3, 3);
+            expect(testLayout.checkPosition).toHaveBeenCalled();
+        });
+
+        it('should call to Cell.modify method', function() {
+            spyOn(testCell, 'modify').andCallThrough();
+            testCell.reposition(3, 3);
+            expect(testCell.modify).toHaveBeenCalled();
+            expect(testCell.modify).toHaveBeenCalledWith(['3-3', '3-4', '4-3', '4-4']);
+        });
+
     });
 
     describe('Cell.resize', function() {
@@ -250,6 +263,18 @@ define(['layout',
             testCell.resize(6, 6);
             expect($(layoutContainer).find('div#testCell'))
                 .toHaveAttr('style', 'width: 50%; height: 50%; top: 33.333333333333336%; left: 33.333333333333336%; ');
+        });
+
+        it('should call to checkPosition', function() {
+            spyOn(testLayout, 'checkPosition').andCallThrough();
+            testCell.resize(6, 6);
+            expect(testLayout.checkPosition).toHaveBeenCalled();
+        });
+
+        it('should call to Cell.modify method', function() {
+            spyOn(testCell, 'modify').andCallThrough();
+            testCell.resize(6, 6);
+            expect(testCell.modify).toHaveBeenCalled();
         });
 
     });
