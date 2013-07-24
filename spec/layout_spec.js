@@ -203,33 +203,101 @@ define(['layout',
     });
 
     describe('Layout.checkPosition', function() {
-        var testLayout;
 
-        beforeEach(function() {
-            testLayout = new Layout(),
+        describe('trivial tests', function() {
+            var testLayout;
 
-            testLayout.initConfig({
-                fluid: true,
-                container: 'div.layout',
-                columns: 5,
-                rows: 5
-            }).refresh();
+            beforeEach(function() {
+                testLayout = new Layout(),
 
-            ['3-3', '3-4', '4-3', '4-4'].forEach(function(obj) {
-                testLayout.Plots[obj].occupied = true;
+                testLayout.initConfig({
+                    fluid: true,
+                    container: 'div.layout',
+                    columns: 5,
+                    rows: 5
+                }).refresh();
+
+                ['3-3', '3-4', '4-3', '4-4'].forEach(function(obj) {
+                    testLayout.Plots[obj].occupied = true;
+                });
+            });
+
+            afterEach(function() {
+                testLayout = null;
+            });
+
+            it('should return false when one or more specified plots is occupied', function() {
+                expect(testLayout.checkPosition(['3-2', '3-3'])).toBe(false);
+            });
+
+            it('should return true when no specified plots are occupied', function() {
+                expect(testLayout.checkPosition(['1-2', '2-2'])).toBe(true);
             });
         });
 
-        afterEach(function() {
-            testLayout = null;
-        });
+        describe('working with reposition and resize', function() {
+            var testLayout,
+                testCell;
 
-        it('should return false when one or more specified plots is occupied', function() {
-            expect(testLayout.checkPosition(['3-2', '3-3'])).toBe(false);
-        });
+            beforeEach(function() {
+                testLayout = new Layout();
+                testLayout.initConfig({
+                    fluid: true,
+                    container: 'div.layout',
+                    rows: 8,
+                    columns: 8
+                }).refresh();
 
-        it('should return true when no specified plots are occupied', function() {
-            expect(testLayout.checkPosition(['1-2', '2-2'])).toBe(true);
+                testLayout.addCell(0, 0, 2, 2, 'testCell_1', 'className');
+                testLayout.addCell(2, 2, 2, 2, 'testCell_2', 'className');
+
+                testCell = testLayout.Cells.testCell_1;
+            });
+
+            afterEach(function() {
+                testLayout = null;
+            });
+
+            it('checkPosition should be called when things are moved', function() {
+                spyOn(testLayout, 'checkPosition').andCallThrough();
+                testCell.reposition(2, 2);
+                expect(testLayout.checkPosition).toHaveBeenCalled();
+            });
+
+            it('checkPosition called when things resized', function() {
+                spyOn(testLayout, 'checkPosition').andCallThrough();
+                testCell.resize(2, 4);
+                expect(testLayout.checkPosition).toHaveBeenCalled();
+            });
+
+            it('cell reposition should fail when another cell obstructs', function() {
+                expect(testCell.occupiedPlots[0]).toBe('0-0');
+                testCell.reposition(2, 2);
+                expect(testCell.occupiedPlots[0]).toBe('0-0');
+            });
+
+            it('cell reposition should succeed when nothing is in the way', function() {
+                expect(testCell.occupiedPlots[0]).toBe('0-0');
+                testCell.reposition(2, 0);
+                expect(testCell.occupiedPlots[0]).toBe('2-0');
+            });
+
+            it('cell resize should fail when another cell obstructs', function() {
+                expect(testCell.occupiedPlots.length).toBe(4);
+                expect(testLayout.getOccupied().length).toBe(8);
+                testCell.resize(4, 4);
+                expect(testCell.occupiedPlots.length).toBe(4);
+                expect(testLayout.getOccupied().length).toBe(8);  
+            });
+
+            it('cell resize should succeed when nothing is in the way', function() {
+                expect(testCell.occupiedPlots.length).toBe(4);
+                expect(testLayout.getOccupied().length).toBe(8);
+                testCell.resize(2, 4);
+                expect(testCell.occupiedPlots.length).toBe(8);
+                expect(testLayout.getOccupied().length).toBe(12);  
+            });
+
         });
     });
 
