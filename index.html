@@ -4,7 +4,20 @@
     <meta charset="UTF-8">
     <title>Absolute Layouts</title>
     <link rel="stylesheet" href="style/screen.css" />
-    <script data-main='src/layout' src='src/vendor/require.js'></script>
+    <script data-main='dist/load' src='dist/require.js'></script>
+    <style>
+        .testCell {
+            outline: 1px red dashed;
+            position: absolute;
+        }
+
+        .layoutBox {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            outline: 1px black dashed;
+        }
+    </style>
 </head>
 <body>
     <div class="wrapper">
@@ -12,7 +25,7 @@
             <h1>Hiyo! Ba da!</h1>
         </header>
         <section class="main">
-            <div class="layout_container"></div>
+            <div class="layoutBox"></div>
         </section>
         <footer>&copy; Mike Fooks 2013</footer>
     </div>

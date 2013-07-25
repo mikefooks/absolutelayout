@@ -1,6 +1,19 @@
 module.exports = function(grunt) {
 
     grunt.initConfig({
+        requirejs: {
+            compile: {
+                options: {
+                    mainConfigFile: 'src/vendor/require.config.js',
+                    baseUrl: 'src/',
+                    name: 'layout',
+                    out: 'dist/layout.min.js',
+                    paths: {
+                        'jquery': 'empty:http://code.jquery.com/jquery-1.9.1.min.js'
+                    }
+                }
+            }
+        },
         jasmine: {
             layout : {
                 src: 'src/*.js',
@@ -38,6 +51,8 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-requirejs');
 
     grunt.registerTask('test', ['jasmine:layout']);
+    grunt.registerTask('compile', ['requirejs:compile']);
 };
