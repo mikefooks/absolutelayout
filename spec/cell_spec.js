@@ -278,4 +278,46 @@ define(['layout',
         });
 
     });
+
+    describe('Cell.toCss', function() {
+        var testLayout,
+            testCell;
+
+        beforeEach(function() {
+            testLayout = new Layout();
+            testLayout.initConfig({
+                fluid: true,
+                container: 'div.layout',
+                rows: 10,
+                columns: 10
+            }).refresh();
+
+            testCell = new Cell.Cell();
+            testCell.initConfig(
+                new Cell.CellInfo(2, 2, 4, 4, 'testCell', 'specialClass'),
+                testLayout
+            );
+
+            testCell.render();
+
+        });
+
+        afterEach(function() {
+            testLayout = testCell = null;
+        });
+
+        it('function should exist', function() {
+            expect(typeof testCell.toCss).toBe('function');
+        });
+
+        it('return value should be a string', function() {
+            expect(typeof testCell.toCss()).toBe('string');
+        });
+
+        it('should spit out the correct values', function() {
+            expect(testCell.toCss()).toBe("#testCell { position: absolute; width: 40%; height: 40%; top: 20%; left: 20%; }");
+        });
+
+
+    });
 });

@@ -172,6 +172,19 @@ define('cell', ['jquery'], function($) {
 
             this.$obj.css(this.cssProps);
 
+        },
+        toCss: function() {
+            var that = this,
+                styleAttrs = this.$obj.attr('style');
+                newAttrs = styleAttrs
+                    .trim()
+                    .split(' ');
+
+            newAttrs.unshift("#" + this.cellInfo.idName + ' { position: absolute;');
+            newAttrs.push('}');
+            newAttrs = newAttrs.join(' ');
+
+            return newAttrs;
         }
     };
 
