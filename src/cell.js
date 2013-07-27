@@ -178,7 +178,7 @@ define('cell', ['jquery'], function($) {
         * with its position and size properties.
         */
         toCss: function() {
-            var styleAttrs = this.$obj.attr('style');
+            var styleAttrs = this.$obj.attr('style'),
                 newAttrs = styleAttrs
                     .trim()
                     .split(' ');

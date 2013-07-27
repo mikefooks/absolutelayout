@@ -287,7 +287,7 @@ define(['layout',
                 expect(testLayout.getOccupied().length).toBe(8);
                 testCell.resize(4, 4);
                 expect(testCell.occupiedPlots.length).toBe(4);
-                expect(testLayout.getOccupied().length).toBe(8);  
+                expect(testLayout.getOccupied().length).toBe(8);
             });
 
             it('cell resize should succeed when nothing is in the way', function() {
@@ -295,7 +295,7 @@ define(['layout',
                 expect(testLayout.getOccupied().length).toBe(8);
                 testCell.resize(2, 4);
                 expect(testCell.occupiedPlots.length).toBe(8);
-                expect(testLayout.getOccupied().length).toBe(12);  
+                expect(testLayout.getOccupied().length).toBe(12);
             });
 
         });
@@ -364,5 +364,42 @@ define(['layout',
             expect($(testLayout.config.container).find('div#testCell')).toHaveCss({height: '20%'});
         });
 
+    });
+
+    describe('Layout.getCss', function() {
+        var testLayout;
+
+        beforeEach(function() {
+            testLayout = new Layout();
+            testLayout.initConfig(
+                new ConfigObject(true, 'div.layout', 10, 10)
+            ).refresh();
+
+            testLayout.addCell(0, 0, 2, 2, 'cell_one', 'testCell');
+            testLayout.addCell(4, 4, 2, 2, 'cell_two', 'testCell');
+        });
+
+        afterEach(function() {
+            testLayout = null;
+        });
+
+        it('returned value should be the desired type', function() {
+            expect(typeof testLayout.getCss('string')).toBe('string');
+            expect(Array.isArray(testLayout.getCss('array'))).toBe(true);
+        });
+
+        it('returned value to be correct', function() {
+            expect(testLayout.getCss('array').length).toBe(2);
+            expect(
+                testLayout.getCss('array')[0]
+            ).toBe(
+                "#cell_one { position: absolute; width: 20%; height: 20%; top: 0%; left: 0%; }"
+            );
+            expect(
+                testLayout.getCss('array')[1]
+            ).toBe(
+                "#cell_two { position: absolute; width: 20%; height: 20%; top: 40%; left: 40%; }"
+            );
+        });
     });
 });

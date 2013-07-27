@@ -175,6 +175,26 @@ define('layout', ['jquery', 'plot', 'cell'], function($, Plot, Cell) {
 
                 newCell.render();
             }
+        },
+        /**
+        * Returns CSS declarations containing dimension and location info for
+        * each cell. Passing the argument 'string' will return a single string
+        * containing all declarations. Passing 'array' will return an array with
+        * a declaration for each cell.
+        */
+        getCss: function(returnType) {
+            var cssValues = [],
+                cells = this.Cells;
+
+            Object.keys(cells).forEach(function(obj, idx) {
+                cssValues.push(cells[obj].toCss());
+            });
+
+            if (returnType === 'array') {
+                return cssValues;
+            } else if (returnType === 'string') {
+                return cssValues.join('\n');
+            }
         }
     };
 
