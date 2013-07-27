@@ -21,5 +21,6 @@ require(['layout', 'jquery'], function(Layout, $) {
 		console.log(testLayout.Cells.cell_1);
 		testLayout.Cells.cell_1.reposition(3, 3);
 		console.log(testLayout.Cells.cell_1);
+		console.log(testLayout.Cells.cell_1.toCss());
 	});
 });

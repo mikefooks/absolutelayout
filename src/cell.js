@@ -173,9 +173,12 @@ define('cell', ['jquery'], function($) {
             this.$obj.css(this.cssProps);
 
         },
+        /**
+        * Returns a string with the CSS declaration you'd need to display the cell
+        * with its position and size properties.
+        */
         toCss: function() {
-            var that = this,
-                styleAttrs = this.$obj.attr('style');
+            var styleAttrs = this.$obj.attr('style');
                 newAttrs = styleAttrs
                     .trim()
                     .split(' ');
