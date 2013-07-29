@@ -16,6 +16,20 @@ define(['layout',
         this.rows = rows;
     };
 
+    /**
+    * A little helper for returning test layouts. Save me some time in the
+    * beforeEach functions.
+    */
+    function getTestLayout(fluid, container, rows, columns) {
+        var testLayout = new Layout();
+
+        testLayout.initConfig(
+            new ConfigObject(true, 'div.layout', rows, columns)
+        ).refresh();
+
+        return testLayout;
+    };
+
     describe('Layout object form and instantiation', function() {
         var testLayout;
 
@@ -75,7 +89,6 @@ define(['layout',
             testLayout = new Layout();
             testLayout.initConfig(
                 new ConfigObject(true, 'div.layout', 8, 8)
-            /* Is chaining necessary or useful? Pros? Cons? */
             ).refresh();
         });
 
@@ -104,15 +117,12 @@ define(['layout',
             testPlotDimensions;
 
         beforeEach(function() {
-            testLayout = new Layout();
-            testLayout.initConfig(
-                new ConfigObject(true, 'div.layout', 8, 8)
-            ).refresh();
+            testLayout = getTestLayout(true, 'div.layout', 8, 8);
             testPlotDimensions = testLayout.cellDimensions(2, 3, testLayout);
         });
 
         afterEach(function() {
-            testPlotDimensions = null;
+            testLayout = testPlotDimensions = null;
         });
 
         it('should be inthe proper format', function() {
@@ -126,15 +136,11 @@ define(['layout',
     });
 
     describe('Layout.getOccupied', function() {
-
         var testLayout,
             occupiedPlots;
 
         beforeEach(function() {
-            testLayout = new Layout();
-            testLayout.initConfig(
-                new ConfigObject(true, 'div.layout', 5, 5)
-            ).refresh();
+            testLayout = getTestLayout(true, 'div.layout', 5, 5);
 
             ['1-1', '1-2', '2-1', '2-2'].forEach(function(obj) {
                 testLayout.Plots[obj].occupied = true;
@@ -169,10 +175,7 @@ define(['layout',
             fakeOccupiedPlots;
 
         beforeEach(function() {
-            testLayout = new Layout();
-            testLayout.initConfig(
-                new ConfigObject(true, 'div.layout', 15, 15)
-            ).refresh();
+            testLayout = getTestLayout(true, 'div.layout', 15, 15);
 
             fakeOccupiedPlots = Object.keys(testLayout.Plots).slice(5, 12);
 
@@ -208,14 +211,7 @@ define(['layout',
             var testLayout;
 
             beforeEach(function() {
-                testLayout = new Layout(),
-
-                testLayout.initConfig({
-                    fluid: true,
-                    container: 'div.layout',
-                    columns: 5,
-                    rows: 5
-                }).refresh();
+                testLayout = getTestLayout(true, 'div.layout', 5, 5);
 
                 ['3-3', '3-4', '4-3', '4-4'].forEach(function(obj) {
                     testLayout.Plots[obj].occupied = true;
@@ -240,13 +236,7 @@ define(['layout',
                 testCell;
 
             beforeEach(function() {
-                testLayout = new Layout();
-                testLayout.initConfig({
-                    fluid: true,
-                    container: 'div.layout',
-                    rows: 8,
-                    columns: 8
-                }).refresh();
+                testLayout = getTestLayout(true, 'div.layout', 8, 8);
 
                 testLayout.addCell(0, 0, 2, 2, 'testCell_1', 'className');
                 testLayout.addCell(2, 2, 2, 2, 'testCell_2', 'className');
@@ -306,10 +296,7 @@ define(['layout',
             outputPlots;
 
         beforeEach(function() {
-            testLayout = new Layout();
-            testLayout.initConfig(
-                new ConfigObject(true, 'div.layout', 8, 8)
-            ).refresh();
+            testLayout = getTestLayout(true, 'div.layout', 8, 8);
 
             outputPlots = testLayout.getPlots(3, 2, 2, 2);
         });
@@ -333,10 +320,7 @@ define(['layout',
             cellKeys;
 
         beforeEach(function() {
-            testLayout = new Layout();
-            testLayout.initConfig(
-                new ConfigObject(true, 'div.layout', 10, 10)
-            ).refresh();
+            testLayout = getTestLayout(true, 'div.layout', 10, 10);
             testLayout.config.container = $(Wrapper).find('div.layout');
         });
 
@@ -370,10 +354,7 @@ define(['layout',
         var testLayout;
 
         beforeEach(function() {
-            testLayout = new Layout();
-            testLayout.initConfig(
-                new ConfigObject(true, 'div.layout', 10, 10)
-            ).refresh();
+            testLayout = getTestLayout(true, 'div.layout', 10, 10);
 
             testLayout.config.container = $(Wrapper).find('div.layout');
 
@@ -406,10 +387,7 @@ define(['layout',
         var testLayout;
 
         beforeEach(function() {
-            testLayout = new Layout();
-            testLayout.initConfig(
-                new ConfigObject(true, 'div.layout', 10, 10)
-            ).refresh();
+            testLayout = getTestLayout(true, 'div.layout', 10, 10);
 
             testLayout.addCell(0, 0, 2, 2, 'cell_one', 'testCell');
             testLayout.addCell(4, 4, 2, 2, 'cell_two', 'testCell');

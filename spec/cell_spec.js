@@ -3,6 +3,22 @@ define(['layout',
         'text!spec/fixtures/wrapper_fixture.html'],
         function(Layout, Cell, Wrapper) {
 
+    /**
+    * Helper method for generating test layouts.
+    */
+    function getTestLayout(fluid, container, rows, columns) {
+        var testLayout = new Layout();
+
+        testLayout.initConfig({
+            fluid: fluid,
+            container: container,
+            rows: rows,
+            columns: columns
+        }).refresh();
+
+        return testLayout;
+    };
+
     describe('Cell - instantiation and object structure', function() {
         var testCell,
             testCellKeys;
@@ -34,14 +50,7 @@ define(['layout',
 
     describe('Cell.initConfig - Cell configuration', function() {
         var testCell,
-            testLayout = new Layout();
-
-            testLayout.initConfig({
-                fluid: true,
-                container: 'div.layout',
-                columns: 10,
-                rows: 10
-            }).refresh();
+            testLayout = getTestLayout(true, 'div.layout', 10, 10);
 
         beforeEach(function() {
             testCell = new Cell.Cell();
@@ -80,12 +89,7 @@ define(['layout',
             layoutContainer;
 
         beforeEach(function() {
-            testLayout = new Layout();
-            testLayout.initConfig({
-                fluid: true,
-                columns: 15,
-                rows: 15
-            }).refresh();
+            testLayout = getTestLayout(true, 'div.layout', 15, 15);
             testLayout.config.container = $(Wrapper).find('div.layout');
 
             testCell = new Cell.Cell();
@@ -131,15 +135,9 @@ define(['layout',
             layoutContainer;
 
         beforeEach(function() {
-            testLayout = new Layout();
-            testLayout.initConfig({
-                fluid: true,
-                container: 'div.layout',
-                rows: 10,
-                columns: 10
-            }).refresh();
-
+            testLayout = getTestLayout(true, 'div.layout', 10, 10);
             testLayout.config.container = $(Wrapper).find('div.layout');
+
             testLayout.addCell(0, 0, 2, 2, 'testCell', 'classHere');
             testCell = testLayout.Cells.testCell;
 
@@ -220,13 +218,7 @@ define(['layout',
             layoutContainer;
 
         beforeEach(function() {
-            testLayout = new Layout();
-            testLayout.initConfig({
-                fluid: true,
-                container: 'div.layout',
-                rows: 12,
-                columns: 12
-            }).refresh();
+            testLayout = getTestLayout(true, 'div.layout', 12, 12);
 
             testLayout.config.container = $(Wrapper).find('div.layout');
             layoutContainer = testLayout.config.container;
@@ -284,13 +276,7 @@ define(['layout',
             testCell;
 
         beforeEach(function() {
-            testLayout = new Layout();
-            testLayout.initConfig({
-                fluid: true,
-                container: 'div.layout',
-                rows: 10,
-                columns: 10
-            }).refresh();
+            testLayout = getTestLayout(true, 'div.layout', 10, 10);
 
             testCell = new Cell.Cell();
             testCell.initConfig(

@@ -6,9 +6,6 @@ define(['layout', 'plot'], function(Layout, Plot) {
             testPlot_1;
 
         beforeEach(function() {
-            /** 
-            * think long and hard about how you want to test fluid = false
-            */
             fakeConfig = {
                 fluid: true,
                 container: 'div.test',
