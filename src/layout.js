@@ -182,7 +182,13 @@ define('layout', ['jquery', 'plot', 'cell'], function($, Plot, Cell) {
         * Removes a specified cell from the layout.
         */
         removeCell: function(idName) {
+            var that = this;
+
             this.Cells[idName].$obj.remove();
+            this.Cells[idName].occupiedPlots.forEach(function(plotName) {
+                that.Plots[plotName].occupied = false;
+            });
+
             delete this.Cells[idName];
 
             return this;

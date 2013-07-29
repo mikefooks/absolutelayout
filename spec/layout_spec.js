@@ -395,6 +395,11 @@ define(['layout',
             expect(testLayout.config.container).not.toContain('div#testCell');
             expect($(testLayout.config.container).find('div#testCell')).not.toHaveClass('className');
         });
+
+        it('should change occupied flag on plots back to false', function() {
+            testLayout.removeCell('testCell');
+            expect(testLayout.Plots['1-1'].occupied).toBe(false);
+        });
     });
 
     describe('Layout.getCss', function() {
