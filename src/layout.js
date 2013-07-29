@@ -175,6 +175,17 @@ define('layout', ['jquery', 'plot', 'cell'], function($, Plot, Cell) {
 
                 newCell.render();
             }
+
+            return this;
+        },
+        /**
+        * Removes a specified cell from the layout.
+        */
+        removeCell: function(idName) {
+            this.Cells[idName].$obj.remove();
+            delete this.Cells[idName];
+
+            return this;
         },
         /**
         * Returns CSS declarations containing dimension and location info for

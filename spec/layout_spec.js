@@ -366,6 +366,37 @@ define(['layout',
 
     });
 
+    describe('Layout.removeCell', function() {
+        var testLayout;
+
+        beforeEach(function() {
+            testLayout = new Layout();
+            testLayout.initConfig(
+                new ConfigObject(true, 'div.layout', 10, 10)
+            ).refresh();
+
+            testLayout.config.container = $(Wrapper).find('div.layout');
+
+            testLayout.addCell(1, 1, 1, 1, 'testCell', 'className');
+        });
+
+        afterEach(function() {
+            testLayout = null;
+        });
+
+        it('should remove the cell from the cell object', function() {
+            testLayout.removeCell('testCell');
+            expect(Object.keys(testLayout.Cells).length).not.toBe(1);
+
+        });
+
+        it('should remove the cell from the fake DOM', function() {
+            testLayout.removeCell('testCell');
+            expect(testLayout.config.container).not.toContain('div#testCell');
+            expect($(testLayout.config.container).find('div#testCell')).not.toHaveClass('className');
+        });
+    });
+
     describe('Layout.getCss', function() {
         var testLayout;
 
