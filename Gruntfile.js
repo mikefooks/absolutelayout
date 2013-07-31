@@ -2,12 +2,23 @@ module.exports = function(grunt) {
 
     grunt.initConfig({
         requirejs: {
-            compile: {
+            compile_layout: {
                 options: {
                     mainConfigFile: 'src/vendor/require.config.js',
                     baseUrl: 'src/',
                     name: 'layout',
                     out: 'dist/layout.min.js',
+                    paths: {
+                        'jquery': 'empty:http://code.jquery.com/jquery-1.9.1.min.js'
+                    }
+                }
+            },
+            compile_controller: {
+                options: {
+                    mainConfigFile: 'src/vendor/require.config.js',
+                    baseUrl: 'src/',
+                    name: 'controller',
+                    out: 'dist/controller.min.js',
                     paths: {
                         'jquery': 'empty:http://code.jquery.com/jquery-1.9.1.min.js'
                     }
@@ -54,5 +65,5 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-requirejs');
 
     grunt.registerTask('test', ['jasmine:layout']);
-    grunt.registerTask('compile', ['requirejs:compile']);
+    grunt.registerTask('compile', ['requirejs:compile_layout', 'requirejs:compile_controller']);
 };
