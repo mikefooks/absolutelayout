@@ -1,7 +1,8 @@
-define('controller', [], function() {
+define('controller', ['jquery'], function($) {
 
     var Controller = function() {
         this.layout = {};
+        this.events = {};
     };
 
     Controller.prototype = {
