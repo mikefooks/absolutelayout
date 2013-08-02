@@ -20,8 +20,8 @@ define('controller', ['jquery'], function($) {
         nudgeLeft: function() {
             var targetCell = this.layout.Cells[this.activeCell],
                 location = targetCell.occupiedPlots[0].split('-'),
-                newTop = parseInt(location[0]),
-                newLeft = parseInt(location[1]) - 1;
+                newTop = parseInt(location[0], 10),
+                newLeft = parseInt(location[1], 10) - 1;
 
             targetCell.reposition(newTop, newLeft);
         },
@@ -29,8 +29,8 @@ define('controller', ['jquery'], function($) {
         nudgeRight: function() {
             var targetCell = this.layout.Cells[this.activeCell],
                 location = targetCell.occupiedPlots[0].split('-'),
-                newTop = parseInt(location[0]),
-                newLeft = parseInt(location[1]) + 1;
+                newTop = parseInt(location[0], 10),
+                newLeft = parseInt(location[1], 10) + 1;
 
             targetCell.reposition(newTop, newLeft);
         },
@@ -38,8 +38,8 @@ define('controller', ['jquery'], function($) {
         nudgeUp: function() {
             var targetCell = this.layout.Cells[this.activeCell],
                 location = targetCell.occupiedPlots[0].split('-'),
-                newTop = parseInt(location[0]) - 1,
-                newLeft = parseInt(location[1]);
+                newTop = parseInt(location[0], 10) - 1,
+                newLeft = parseInt(location[1], 10);
 
             targetCell.reposition(newTop, newLeft);
         },
@@ -47,10 +47,26 @@ define('controller', ['jquery'], function($) {
         nudgeDown: function() {
             var targetCell = this.layout.Cells[this.activeCell],
                 location = targetCell.occupiedPlots[0].split('-'),
-                newTop = parseInt(location[0]) + 1,
-                newLeft = parseInt(location[1]);
+                newTop = parseInt(location[0], 10) + 1,
+                newLeft = parseInt(location[1], 10);
 
             targetCell.reposition(newTop, newLeft);
+        },
+
+        expandHoriz: function() {
+            var targetCell = this.layout.Cells[this.activeCell],
+                newWidth = targetCell.cellInfo.width + 1,
+                height = targetCell.cellInfo.height;
+
+            targetCell.resize(height, newWidth);
+        },
+
+        contractHoriz: function() {
+            var targetCell = this.layout.Cells[this.activeCell],
+                newWidth = targetCell.cellInfo.width - 1,
+                height = targetCell.cellInfo.height;
+
+            targetCell.resize(height, newWidth);
         }
 
     };
