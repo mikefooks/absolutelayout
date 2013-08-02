@@ -103,23 +103,29 @@ define(['controller', 'layout'], function(Controller, Layout) {
         it('should expand and contract horizontally.', function() {
             expect(testCell.cssProps.width).toBe('10%');
             expect(testCell.cellInfo.width).toBe(1);
+            expect(testCell.occupiedPlots.length).toBe(1);
             testController.expandHoriz();
             expect(testCell.cssProps.width).toBe('20%');
             expect(testCell.cellInfo.width).toBe(2);
+            expect(testCell.occupiedPlots.length).toBe(2);
             testController.contractHoriz();
             expect(testCell.cssProps.width).toBe('10%');
             expect(testCell.cellInfo.width).toBe(1);
+            expect(testCell.occupiedPlots.length).toBe(1);
         });
 
         it('should expand and contract vertically.', function() {
             expect(testCell.cssProps.height).toBe('10%');
             expect(testCell.cellInfo.height).toBe(1);
+            expect(testCell.occupiedPlots.length).toBe(1);
             testController.expandVert();
             expect(testCell.cssProps.height).toBe('20%');
             expect(testCell.cellInfo.height).toBe(2);
+            expect(testCell.occupiedPlots.length).toBe(2);
             testController.contractVert();
             expect(testCell.cssProps.height).toBe('10%');
             expect(testCell.cellInfo.height).toBe(1);
+            expect(testCell.occupiedPlots.length).toBe(1);
         });
 
 
