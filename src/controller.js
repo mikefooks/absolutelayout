@@ -67,6 +67,22 @@ define('controller', ['jquery'], function($) {
                 height = targetCell.cellInfo.height;
 
             targetCell.resize(height, newWidth);
+        },
+
+        expandVert: function() {
+            var targetCell = this.layout.Cells[this.activeCell],
+                newHeight = targetCell.cellInfo.height + 1,
+                width = targetCell.cellInfo.width;
+
+            targetCell.resize(newHeight, width);
+        },
+
+        contractVert: function() {
+            var targetCell = this.layout.Cells[this.activeCell],
+                newHeight = targetCell.cellInfo.height - 1,
+                width = targetCell.cellInfo.width;
+
+            targetCell.resize(newHeight, width);
         }
 
     };

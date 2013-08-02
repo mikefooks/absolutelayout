@@ -111,6 +111,17 @@ define(['controller', 'layout'], function(Controller, Layout) {
             expect(testCell.cellInfo.width).toBe(1);
         });
 
+        it('should expand and contract vertically.', function() {
+            expect(testCell.cssProps.height).toBe('10%');
+            expect(testCell.cellInfo.height).toBe(1);
+            testController.expandVert();
+            expect(testCell.cssProps.height).toBe('20%');
+            expect(testCell.cellInfo.height).toBe(2);
+            testController.contractVert();
+            expect(testCell.cssProps.height).toBe('10%');
+            expect(testCell.cellInfo.height).toBe(1);
+        });
+
 
     });
 
