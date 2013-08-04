@@ -2,19 +2,41 @@ define('controller', ['jquery'], function($) {
 
     var Controller = function() {
         this.layout = {};
-        this.activeCell = ''
+        this.events = {};
+        this.activeCell = '';
     };
 
     Controller.prototype = {
 
         init: function(layout) {
-            var cellKeys = Object.keys(layout.Cells);
+            var cellKeys = Object.keys(layout.Cells),
+                that = this;
 
             this.layout = layout;
 
             if (cellKeys.length > 0) {
                 this.activeCell = cellKeys[0];
             }
+
+            $(document).on('keyup', function(evt) {
+                switch (evt.which) {
+                    case 37:
+                        (evt.ctrlKey) ? that.contractHoriz() : that.nudgeLeft();
+                        break;
+                    case 38:
+                        (evt.ctrlKey) ? that.contractVert() : that.nudgeUp();
+                        break;
+                    case 39:
+                        (evt.ctrlKey) ? that.expandHoriz() : that.nudgeRight();
+                        break;
+                    case 40:
+                        (evt.ctrlKey) ? that.expandVert() : that.nudgeDown();
+                        break;
+                    default:
+                        console.log('command not recognized.');
+                        break;
+                }
+            });
         },
 
         nudgeLeft: function() {

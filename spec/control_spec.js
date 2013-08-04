@@ -31,8 +31,24 @@ define(['controller', 'layout'], function(Controller, Layout) {
 
         it('should instantiate properly and have the correct attributes', function() {
             expect(typeof testController).toBe('object');
-            expect(Object.keys(testController).length).toBe(2);
+            expect(Object.keys(testController).length).toBe(3);
             expect(Object.keys(testController.layout).length).toBe(4);
+        });
+
+    });
+
+    describe('controller event binding', function() {
+        var testLayout, testController, spyKeyboard;
+
+        beforeEach(function() {
+            testLayout = getTestLayout(true, 'div.layout', 10, 10);
+            testController = new Controller();
+
+            testController.init(testLayout);
+        });
+
+        afterEach(function() {
+            testLayout = testController = null;
         });
 
     });
