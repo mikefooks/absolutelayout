@@ -37,6 +37,10 @@ define(['controller', 'layout'], function(Controller, Layout) {
 
     });
 
+    /**
+    * Need some helpers for testing event binding and triggering.
+    */
+
     describe('controller event binding', function() {
         var testLayout, testController, spyKeyboard;
 
@@ -75,24 +79,24 @@ define(['controller', 'layout'], function(Controller, Layout) {
 
         it('cell.reposition should be called', function() {
             spyOn(testLayout.Cells.testCell, 'reposition').andCallThrough();
-            testController.nudgeRight();
+            testController.nudge('right');
             expect(testCell.reposition).toHaveBeenCalled();
         });
 
         it('should nudge things in the appropriate directions', function() {
-            testController.nudgeRight();
+            testController.nudge('right');
             expect(testCell.occupiedPlots[0]).toBe('5-6');
             expect(testCell.cssProps.top).toBe('50%');
             expect(testCell.cssProps.left).toBe('60%');
-            testController.nudgeDown();
+            testController.nudge('down');
             expect(testCell.occupiedPlots[0]).toBe('6-6');
             expect(testCell.cssProps.top).toBe('60%');
             expect(testCell.cssProps.left).toBe('60%');
-            testController.nudgeLeft();
+            testController.nudge('left');
             expect(testCell.occupiedPlots[0]).toBe('6-5');
             expect(testCell.cssProps.top).toBe('60%');
             expect(testCell.cssProps.left).toBe('50%');
-            testController.nudgeUp();
+            testController.nudge('up');
             expect(testCell.occupiedPlots[0]).toBe('5-5');
             expect(testCell.cssProps.top).toBe('50%');
             expect(testCell.cssProps.left).toBe('50%');

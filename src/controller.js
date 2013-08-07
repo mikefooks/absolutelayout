@@ -8,6 +8,10 @@ define('controller', ['jquery'], function($) {
 
     Controller.prototype = {
 
+        /**
+        * initialize controller, bind keyboard events
+        */
+
         init: function(layout) {
             var cellKeys = Object.keys(layout.Cells),
                 that = this;
@@ -18,19 +22,19 @@ define('controller', ['jquery'], function($) {
                 this.activeCell = cellKeys[0];
             }
 
-            $(document).on('keyup', function(evt) {
+            this.layout.config.container.on('keyup', function(evt) {
                 switch (evt.which) {
                     case 37:
-                        (evt.ctrlKey) ? that.contractHoriz() : that.nudgeLeft();
+                        (evt.ctrlKey) ? that.contractHoriz() : that.nudge('left');
                         break;
                     case 38:
-                        (evt.ctrlKey) ? that.contractVert() : that.nudgeUp();
+                        (evt.ctrlKey) ? that.contractVert() : that.nudge('up');
                         break;
                     case 39:
-                        (evt.ctrlKey) ? that.expandHoriz() : that.nudgeRight();
+                        (evt.ctrlKey) ? that.expandHoriz() : that.nudge('right');
                         break;
                     case 40:
-                        (evt.ctrlKey) ? that.expandVert() : that.nudgeDown();
+                        (evt.ctrlKey) ? that.expandVert() : that.nudge('down');
                         break;
                     default:
                         console.log('command not recognized.');
@@ -39,42 +43,45 @@ define('controller', ['jquery'], function($) {
             });
         },
 
-        nudgeLeft: function() {
+        /**
+        * Nudge the activeCell one row or column in a given direction.
+        */
+        nudge: function(dir) {
             var targetCell = this.layout.Cells[this.activeCell],
                 location = targetCell.occupiedPlots[0].split('-'),
-                newTop = parseInt(location[0], 10),
-                newLeft = parseInt(location[1], 10) - 1;
+                newTop,
+                newLeft;
 
-            targetCell.reposition(newTop, newLeft);
+            switch (dir) {
+                case 'left':
+                    newTop = parseInt(location[0], 10);
+                    newLeft = parseInt(location[1], 10) - 1;
+                    targetCell.reposition(newTop, newLeft);
+                    break;
+                case 'right':
+                    newTop = parseInt(location[0], 10);
+                    newLeft = parseInt(location[1], 10) + 1;
+                    targetCell.reposition(newTop, newLeft);
+                    break;
+                case 'up':
+                    newTop = parseInt(location[0], 10) - 1;
+                    newLeft = parseInt(location[1], 10);
+                    targetCell.reposition(newTop, newLeft);
+                    break;
+                case 'down':
+                    newTop = parseInt(location[0], 10) + 1;
+                    newLeft = parseInt(location[1], 10);
+                    targetCell.reposition(newTop, newLeft);
+                    break;
+                default:
+                    console.log('did not recognize direction argument.');
+                    break;
+            }
         },
 
-        nudgeRight: function() {
-            var targetCell = this.layout.Cells[this.activeCell],
-                location = targetCell.occupiedPlots[0].split('-'),
-                newTop = parseInt(location[0], 10),
-                newLeft = parseInt(location[1], 10) + 1;
-
-            targetCell.reposition(newTop, newLeft);
-        },
-
-        nudgeUp: function() {
-            var targetCell = this.layout.Cells[this.activeCell],
-                location = targetCell.occupiedPlots[0].split('-'),
-                newTop = parseInt(location[0], 10) - 1,
-                newLeft = parseInt(location[1], 10);
-
-            targetCell.reposition(newTop, newLeft);
-        },
-
-        nudgeDown: function() {
-            var targetCell = this.layout.Cells[this.activeCell],
-                location = targetCell.occupiedPlots[0].split('-'),
-                newTop = parseInt(location[0], 10) + 1,
-                newLeft = parseInt(location[1], 10);
-
-            targetCell.reposition(newTop, newLeft);
-        },
-
+        /* 
+        * Expand or contract the activeCell by one row or column.
+        */
         expandHoriz: function() {
             var targetCell = this.layout.Cells[this.activeCell],
                 newWidth = targetCell.cellInfo.width + 1,
