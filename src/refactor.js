@@ -21,7 +21,7 @@ Layout.prototype = {
      * Layout's configuration.
      */
     refresh: function () {
-        var plots = this.Plots || (this.Plots = {}),
+        var plots = this.plots || (this.plots = {}),
             i, j, dimensions;
 
         for (i = 0; i < this.rows; i++) {
@@ -30,9 +30,10 @@ Layout.prototype = {
                 // top values for the plot's location.
                 dimensions = this.cellDimensions(i, j);
 
-                this.Plots[i + "-" + j] = {
+                this.plots[i + "-" + j] = {
                     row: i,
                     column: j,
+                    occupied: false,
                     css: {
                         position: "absolute",
                         top: dimensions.height,
@@ -52,4 +53,53 @@ Layout.prototype = {
             height: ((100 / this.rows) * row) + '%'
         };
     },
+    /**
+     * Returns an object containing all the plots which have their occupied
+     * property set to true on account of their being occupied
+     * by a Cell.
+     */
+    getOccupied: function () {
+        return objFilter(this.plots, function (plot) {
+            return plot.occupied;
+        });
+    },
+    /**
+     * Opposite of above. Return an object containing the unoccupied
+     * plots.
+     */
+    getUnoccupied: function () {
+        return objFilter(this.plots, function (plot) {
+            return !plot.occupied;
+        });
+    }
 };
+
+/**
+ * filters objects based on a callback comparator.
+ */
+function objFilter(obj, callback, context) {
+    var ret = {};
+
+    forIn(obj, function (value, key) {
+        if (callback(value)) {
+            ret[key] = value;
+        }
+    }, context);
+
+    return ret;
+}
+
+/**
+ * For looping through objects and applying a callback. Context
+ * is optional.
+ */
+function forIn(obj, callback, context) {
+    var keys = Object.keys(obj),
+        i;
+
+        context || (context = this);
+
+    for (i = 0; i < keys.length; i++) {
+        callback.call(context, obj[keys[i]], keys[i]);
+    }
+}
