@@ -125,24 +125,22 @@ Layout.prototype = {
             plots = this._getPlots.apply(null, params),
             positionCheck = this._checkPosition(plots),
             cells = this.cells || (this.cells = []),
-            cellElement = createCellElement(params),
             newCell;
 
         if (Array.isArray(plots) && positionCheck) {
+            console.log(this);
+
             newCell = new Cell({
                 top: top,
                 left: left,
                 rows: rows,
                 columns: columns,
                 plots: plots,
-                el: cellElement
             });
         }
 
-        cells.push(newCell);
-
         return newCell;
-            // appendTo(newCell.createEl(), this.container);
+        // appendTo(newCell.createEl(), this.container);
     }
 };
 
@@ -158,19 +156,25 @@ Cell.prototype = {
     constructor: Cell,
 
     /**
-     * Creates a dom element of of the cell's properties.
+     * Creates a dom element of the cell's properties.
      */
-    createEl: function () {
-        var el = document.createElement("div");
+    prepare: function () {
+        var el = document.createElement("div"),
+            cellDimensions = this.layout._cellDimensions,
+            position = cellDimensions(this.top, this.left),
+            dimensions = cellDimensions(this.height, this.width);
 
-        return el;
+        el.style.position = "absolute";
+        el.style.top = position.height;
+        el.style.left = position.width;
+        el.style.height = dimensions.height;
+        el.style.width = dimensions.width;
+
+        this.el = el;
+
+        return this;
     }
 };
-
-function createCellElement(params) {
-    var el = document.createElement("div");
-
-}
 
 /**
  * filters objects based on a callback comparator.
