@@ -128,15 +128,7 @@ Layout.prototype = {
             newCell;
 
         if (Array.isArray(plots) && positionCheck) {
-            console.log(this);
 
-            newCell = new Cell({
-                top: top,
-                left: left,
-                rows: rows,
-                columns: columns,
-                plots: plots,
-            });
         }
 
         return newCell;
@@ -144,37 +136,47 @@ Layout.prototype = {
     }
 };
 
-function Cell (params) {
-    this.top = params.top;
-    this.left = params.left;
-    this.rows = params.rows;
-    this.columns =  params.columns;
-    this.plots = params.plots;
+
+/**
+ * Sets style attributes of a given HTMLelement. Can take either
+ * two strings as arguments for a single attribute change or
+ * an object with multiple changes.
+ */
+function setStyles(el) {
+    var styleParams = Array.prototype.slice.call(arguments, 1),
+        keys, i;
+
+    // if using two strings to set a single style property.
+    if (styleParams.length === 2 && styleParams.every(function (param) {
+        return typeof param === "string";
+    })) {
+        el.style[styleParams[0]] = styleParams[1];
+
+    // if using an object literal to set multiple style properties.
+    } else if (styleParams.length === 1 && typeof styleParams === "object") {
+        keys = Object.keys(styleParams[0]);
+
+        for (i = 0; i < keys; i++) {
+            el.style[keys[i]] = styleParams[0][keys[i]];
+        }
+
+    } else {
+        throw new TypeError("Takes either two strings or an object literal");
+    }
+
+    return el;
 }
 
-Cell.prototype = {
-    constructor: Cell,
-
-    /**
-     * Creates a dom element of the cell's properties.
-     */
-    prepare: function () {
-        var el = document.createElement("div"),
-            cellDimensions = this.layout._cellDimensions,
-            position = cellDimensions(this.top, this.left),
-            dimensions = cellDimensions(this.height, this.width);
-
-        el.style.position = "absolute";
-        el.style.top = position.height;
-        el.style.left = position.width;
-        el.style.height = dimensions.height;
-        el.style.width = dimensions.width;
-
-        this.el = el;
-
-        return this;
+/**
+ * appends a child element to a dom node.
+ */
+function appendTo(parent, child, callback) {
+    try {
+        parent.appendChild(child);
+    } catch (err) {
+        callback(err);
     }
-};
+}
 
 /**
  * filters objects based on a callback comparator.
