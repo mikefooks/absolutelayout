@@ -95,8 +95,82 @@ Layout.prototype = {
         }
 
         return true;
+    },
+
+    /**
+     * takes the position and dimension values for a possible cell, and
+     * returns the key names of the plots that such a cell would occupy. 
+     */
+    _getPlots: function(top, left, rows, columns) {
+        var plots = [],
+            onePlot;
+
+        for (var i = 0 ; i < rows; i += 1) {
+            for (var j = 0 ; j < columns; j += 1) {
+                onePlot = (top + i) + "-" + (left + j);
+                plots.push(onePlot);
+            }
+        }
+
+        return plots;
+    },
+
+    /**
+     * builds a cell based on the provided parameters and, if it passes the
+     * _checkPosition test, it gets registered with the Layout.cells object
+     * and is appended to Layout.container.
+     */
+    addCell: function (top, left, rows, columns) {
+        var params = Array.prototype.slice.call(arguments, 0),
+            plots = this._getPlots.apply(null, params),
+            positionCheck = this._checkPosition(plots),
+            cells = this.cells || (this.cells = []),
+            cellElement = createCellElement(params),
+            newCell;
+
+        if (Array.isArray(plots) && positionCheck) {
+            newCell = new Cell({
+                top: top,
+                left: left,
+                rows: rows,
+                columns: columns,
+                plots: plots,
+                el: cellElement
+            });
+        }
+
+        cells.push(newCell);
+
+        return newCell;
+            // appendTo(newCell.createEl(), this.container);
     }
 };
+
+function Cell (params) {
+    this.top = params.top;
+    this.left = params.left;
+    this.rows = params.rows;
+    this.columns =  params.columns;
+    this.plots = params.plots;
+}
+
+Cell.prototype = {
+    constructor: Cell,
+
+    /**
+     * Creates a dom element of of the cell's properties.
+     */
+    createEl: function () {
+        var el = document.createElement("div");
+
+        return el;
+    }
+};
+
+function createCellElement(params) {
+    var el = document.createElement("div");
+
+}
 
 /**
  * filters objects based on a callback comparator.
@@ -129,7 +203,3 @@ function forIn(obj, callback, context) {
 }
 
 var layout = new Layout(10, 10, "div.layoutBox").refresh();
-
-["1-4", "1-5", "1-6", "7-6"].forEach(function (id) {
-    layout.plots[id].occupied = true;
-});
