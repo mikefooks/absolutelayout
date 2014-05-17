@@ -116,6 +116,15 @@ Layout.prototype = {
     },
 
     /**
+     * Appends a given cell to the layout's container element.
+     */
+    _appendToContainer: function (cell) {
+        appendTo(this.container, cell, function (err) {
+            if (err) { console.log(err); }
+        });
+    },
+
+    /**
      * builds a cell based on the provided parameters and, if it passes the
      * _checkPosition test, it gets registered with the Layout.cells object
      * and is appended to Layout.container.
@@ -128,7 +137,11 @@ Layout.prototype = {
             newCell;
 
         if (Array.isArray(plots) && positionCheck) {
-
+            newCell = setStyles(createEl("div"), {
+                top: top,
+                left: left,
+                height: 
+            });
         }
 
         return newCell;
@@ -136,9 +149,15 @@ Layout.prototype = {
     }
 };
 
+/**
+ * Creates an HTML element with the given type.
+ */
+function createEl(type) {
+    return document.createElement(type);
+}
 
 /**
- * Sets style attributes of a given HTMLelement. Can take either
+ * Sets style attributes of a given HTMLelement. Takes either
  * two strings as arguments for a single attribute change or
  * an object with multiple changes.
  */
