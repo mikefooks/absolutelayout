@@ -13,6 +13,16 @@ Layout.prototype = {
 
     constructor: Layout,
 
+    set: function (key, value) {
+        this[key] = value;
+
+        return this;
+    },
+
+    get: function (key) {
+        return this[key];
+    },
+
     /**
      * Creates all the necessary Plot instances, based on the 
      * Layout's configuration.
@@ -115,14 +125,6 @@ Layout.prototype = {
         return plots;
     },
 
-    /**
-     * Appends a given cell to the layout's container element.
-     */
-    _appendToContainer: function (cell) {
-        appendTo(this.container, cell, function (err) {
-            if (err) { console.log(err); }
-        });
-    },
 
     /**
      * builds a cell based on the provided parameters and, if it passes the
@@ -136,24 +138,56 @@ Layout.prototype = {
             cells = this.cells || (this.cells = []),
             newCell;
 
+        // TODO if position check fails, there should be a custom error
+        // of some kind.
+
         if (Array.isArray(plots) && positionCheck) {
-            newCell = setStyles(createEl("div"), {
-                top: top,
-                left: left,
-                height: 
-            });
+            return cells.push(new Cell(params, plots, this));
+        }
+    }
+};
+
+function Cell(dimensions, plots, layout) {
+    this.plots = plots;
+    this.parentLayout = layout;
+    this.el = createEl("div", layout.cellClass);
+    this.dimensions = {
+        top: dimensions[0],
+        left: dimensions[1],
+        rows: dimensions[2],
+        columns: dimensions[3]
+    };
+}
+
+Cell.prototype = {
+    constructor: Cell,
+
+    showConfigs: function () {
+        var ownProperties = {},
+            keys = Object.keys(this),
+            i;
+
+        for (i = 0; i < keys.length; i++) {
+            ownProperties[keys[i]] = this[keys[i]];
         }
 
-        return newCell;
-        // appendTo(newCell.createEl(), this.container);
+        console.log( JSON.stringify(ownProperties) );
     }
 };
 
 /**
  * Creates an HTML element with the given type.
  */
-function createEl(type) {
-    return document.createElement(type);
+function createEl(type, className) {
+    var el = document.createElement(type);
+
+    if (arguments.length === 1) {
+        return el;        
+    }
+
+    el.setAttribute("class", className);
+
+    return el;
 }
 
 /**
@@ -180,10 +214,8 @@ function setStyles(el) {
         }
 
     } else {
-        throw new TypeError("Takes either two strings or an object literal");
+        return el;
     }
-
-    return el;
 }
 
 /**
@@ -227,4 +259,6 @@ function forIn(obj, callback, context) {
     }
 }
 
-var layout = new Layout(10, 10, "div.layoutBox").refresh();
+// Temporary and for testing purposes.
+var layout = new Layout(10, 10, "div.layoutBox")
+    .set("cellClass", "testCell").refresh();
