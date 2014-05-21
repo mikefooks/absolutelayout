@@ -148,44 +148,44 @@ Layout.prototype = {
 };
 
 function Cell(dimensions, plots, layout) {
-    this.plots = plots;
+    var cellDimensions = layout._cellDimensions(dimensions[0], dimensions[1]),
+        newEl = createEl("div", { class: layout.cellClass }),
+        elStyles;
+
+    this.plots = plots.map(function (id) {
+        return layout.plots[id];
+    });
+
+    elStyles = combine(this.plots[0].css, {
+        width: cellDimensions.width,
+        height: cellDimensions.height
+    });
+
     this.parentLayout = layout;
-    this.el = createEl("div", layout.cellClass);
-    this.dimensions = {
-        top: dimensions[0],
-        left: dimensions[1],
-        rows: dimensions[2],
-        columns: dimensions[3]
-    };
+
+    this.el = setStyles(newEl, elStyles);
+
 }
 
 Cell.prototype = {
-    constructor: Cell,
 
-    showConfigs: function () {
-        var ownProperties = {},
-            keys = Object.keys(this),
-            i;
+    constructor: Cell
 
-        for (i = 0; i < keys.length; i++) {
-            ownProperties[keys[i]] = this[keys[i]];
-        }
-
-        console.log( JSON.stringify(ownProperties) );
-    }
 };
 
 /**
  * Creates an HTML element with the given type.
  */
-function createEl(type, className) {
+function createEl(type, attrs) {
     var el = document.createElement(type);
 
     if (arguments.length === 1) {
         return el;        
     }
 
-    el.setAttribute("class", className);
+    forIn(attrs, function (val, key) {
+        el.setAttribute(key, val);
+    });
 
     return el;
 }
@@ -213,9 +213,9 @@ function setStyles(el) {
             el.style[keys[i]] = styleParams[0][keys[i]];
         }
 
-    } else {
-        return el;
     }
+
+    return el;
 }
 
 /**
@@ -256,6 +256,26 @@ function forIn(obj, callback, context) {
 
     for (i = 0; i < keys.length; i++) {
         callback.call(context, obj[keys[i]], keys[i]);
+    }
+}
+
+/**
+ * Takes a bunch of objects and mushes their properties together
+ * into a new combined object.
+ */
+function combine() {
+    var objects = Array.prototype.slice.call(arguments, 0),
+        temp = {},
+        i, keys;
+
+    if (objects.every(function (obj) { return typeof obj === "object" })) {
+        for (i = 0; i < objects.length; i++) {
+            forIn(objects[i], function (val, key) {
+                temp[key] = val;
+            });
+        }
+
+        return temp;
     }
 }
 
