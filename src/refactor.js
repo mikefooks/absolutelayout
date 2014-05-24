@@ -136,19 +136,26 @@ Layout.prototype = {
             plots = this._getPlots.apply(null, params),
             positionCheck = this._checkPosition(plots),
             cells = this.cells || (this.cells = []),
-            newCell;
+            newCell, i;
 
         // TODO if position check fails, there should be a custom error
         // of some kind.
 
         if (Array.isArray(plots) && positionCheck) {
+            for (i = 0; i < plots.length; i++) {
+                this.plots[plots[i]].occupied = true;
+            }
+
             return cells.push(new Cell(params, plots, this));
+
+        } else {
+            return false;
         }
     }
 };
 
 function Cell(dimensions, plots, layout) {
-    var cellDimensions = layout._cellDimensions(dimensions[0], dimensions[1]),
+    var cellDimensions = layout._cellDimensions(dimensions[2], dimensions[3]),
         newEl = createEl("div", { class: layout.cellClass }),
         elStyles;
 
@@ -156,6 +163,9 @@ function Cell(dimensions, plots, layout) {
         return layout.plots[id];
     });
 
+    // combines the first plot's css object, which contains top and left values,
+    // with the just-obtained width and height values from the layout's
+    // _cellDimensions method.
     elStyles = combine(this.plots[0].css, {
         width: cellDimensions.width,
         height: cellDimensions.height
@@ -164,6 +174,8 @@ function Cell(dimensions, plots, layout) {
     this.parentLayout = layout;
 
     this.el = setStyles(newEl, elStyles);
+
+    appendTo(this.parentLayout.container, this.el);
 
 }
 
@@ -209,7 +221,7 @@ function setStyles(el) {
     } else if (styleParams.length === 1 && typeof styleParams === "object") {
         keys = Object.keys(styleParams[0]);
 
-        for (i = 0; i < keys; i++) {
+        for (i = 0; i < keys.length; i++) {
             el.style[keys[i]] = styleParams[0][keys[i]];
         }
 
