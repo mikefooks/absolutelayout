@@ -1,69 +1,17 @@
-module.exports = function(grunt) {
+module.exports = function (grunt) {
 
     grunt.initConfig({
-        requirejs: {
-            compile_layout: {
-                options: {
-                    mainConfigFile: 'src/vendor/require.config.js',
-                    baseUrl: 'src/',
-                    name: 'layout',
-                    out: 'dist/layout.min.js',
-                    paths: {
-                        'jquery': 'empty:http://code.jquery.com/jquery-1.9.1.min.js'
-                    }
-                }
-            },
-            compile_controller: {
-                options: {
-                    mainConfigFile: 'src/vendor/require.config.js',
-                    baseUrl: 'src/',
-                    name: 'controller',
-                    out: 'dist/controller.min.js',
-                    paths: {
-                        'jquery': 'empty:http://code.jquery.com/jquery-1.9.1.min.js'
-                    }
-                }
-            }
-        },
         jasmine: {
-            layout : {
-                src: 'src/*.js',
-                options: {
-                    specs: 'spec/*_spec.js',
-                    helpers: 'spec/helpers/*.js',
-                    keepRunner: false,
-                    template: require('grunt-template-jasmine-requirejs'),
-                    templateOptions: {
-                        requireConfig: {
-                            packages: [
-                                {
-                                    "name": "jquery",
-                                    "location": "src/vendor/jquery",
-                                    "main": "dist/jquery.js"
-                                },
-                                {
-                                    "name": "text",
-                                    "location": "src/vendor/text",
-                                    "main": "text.js"
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        watch: {
-            unit_tests: {
-                files: ['src/*.js', 'src/**/*.js', 'spec/*_spec.js'],
-                tasks: ['test']
+            src: "src/refactor.js",
+            options: {
+                specs: "spec/refactor_spec.js",
+                helpers: "spec/helpers/*.js"
             }
         }
     });
 
-    grunt.loadNpmTasks('grunt-contrib-jasmine');
-    grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-contrib-requirejs');
+    grunt.loadNpmTasks("grunt-contrib-jasmine");
 
-    grunt.registerTask('test', ['jasmine:layout']);
-    grunt.registerTask('compile', ['requirejs:compile_layout', 'requirejs:compile_controller']);
+    grunt.registerTask("test", ["jasmine"]);
+
 };

@@ -290,7 +290,3 @@ function combine() {
         return temp;
     }
 }
-
-// Temporary and for testing purposes.
-var layout = new Layout(10, 10, "div.layoutBox")
-    .set("cellClass", "testCell").refresh();
