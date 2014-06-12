@@ -4,7 +4,7 @@ module.exports = function (grunt) {
         jasmine: {
             src: "src/refactor.js",
             options: {
-                specs: "spec/refactor_spec.js",
+                specs: "spec/*_spec.js",
                 helpers: "spec/helpers/*.js"
             }
         }
