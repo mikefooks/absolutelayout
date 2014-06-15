@@ -2,9 +2,10 @@
 
 describe("utility functions", function () {
 
-    describe("appendTo", function () {
+    describe("DOM utilities: createEl, appendTo, setStyles", function () {
         var parentDiv,
-            childDiv;
+            childDiv,
+            newDiv;
 
         beforeEach(function () {
             parentDiv = document.querySelector("div.layoutBox");
@@ -13,20 +14,55 @@ describe("utility functions", function () {
         });
 
         afterEach(function () {
-            parentDiv.removeChild(childDiv);
-            parentDiv = childDiv = null;
+            parentDiv = childDiv = newDiv = null;
         });
 
-        it("should append the test child div to the parent div.", function () {
+        it("createEl should create a new element", function () {
+            newDiv = createEl("div");
+
+            expect(newDiv instanceof HTMLElement).toBe(true);
+            expect(newDiv.nodeName).toBe("DIV");
+
+        });
+
+        it("createEl should create a new element with optional attributes", function () {
+            newDiv = createEl("div", { id: "newdiv", style: "width: 500px;" });
+
+            expect(newDiv instanceof HTMLElement).toBe(true);
+            expect(newDiv.nodeName).toBe("DIV");
+            expect(newDiv.id).toBe("newdiv");
+            expect(newDiv.style.width).toBe("500px");
+
+        });
+
+        it("setStyles sets one style using two strings as arguments", function () {
+            newDiv = createEl("div");
+            setStyles(newDiv, "width", "500px");
+
+            expect(newDiv.style.width).toBe("500px");
+        });
+
+        it("setStyles sets multiple styles using an object as the second argument", function () {
+            newDiv = createEl("div");
+            setStyles(newDiv, { width: "500px", marginTop: "10px" });
+
+            expect(newDiv.style.width).toBe("500px");
+            expect(newDiv.style.marginTop).toBe("10px");
+        });
+
+        it("appendTo should append the test child div to the parent div.", function () {
             appendTo(parentDiv, childDiv);
 
             expect(parentDiv.children.length).toBe(1);
             expect(parentDiv.lastChild.classList[0]).toBe("testDiv");
+
+            parentDiv.removeChild(childDiv);
         });
+
     });
 
 
-    describe("forIn, shallowCopy, objFilter", function () {
+    describe("Low-level utilities: forIn, combine, objFilter", function () {
         var testObj1,
             testObj2,
             testObj3,
