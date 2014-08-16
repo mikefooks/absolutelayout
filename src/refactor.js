@@ -15,6 +15,9 @@ Layout.prototype = {
 
     constructor: Layout,
 
+    /**
+     * Binds the drag events to the layout element.
+     */
     _bindDragEvents: function () {
         this.container.addEventListener("dragstart", (function (evt) {
             var origin = [evt.layerX, evt.layerY];
@@ -26,24 +29,26 @@ Layout.prototype = {
             var destination = [ evt.layerX, evt.layerY ],
                 destinationPlot = this._findPlot.apply(this, destination),
                 originPlot = evt.dataTransfer.originPlot,
-                lowRow = Math.min(destinationPlot[1], originPlot[1]),
-                highRow = Math.max(destinationPlot[1], originPlot[1]),
-                lowColumn = Math.min(destinationPlot[0], originPlot[0]),
-                highColumn = Math.max(destinationPlot[0], originPlot[0]);
+                newCellProperties = this._calculateCellProperties(originPlot, destinationPlot);
 
-            console.log({
-                lowRow: lowRow,
-                highRow: highRow,
-                lowCol: lowColumn,
-                highCol: highColumn,
-                totalColumns: highColumn - lowColumn,
-                totalRows: highRow - lowRow
-            });
+            this.addCell.apply(this, newCellProperties);
 
-            if (lowRow < highRow && lowColumn < highColumn) {
-                this.addCell(lowRow, lowColumn, highRow - lowRow + 1, highColumn - lowColumn + 1);
-            }
         }).bind(this));  
+    },
+
+    /**
+     * Takes an origin and destination plot from the drag event handler
+     * and returns an array which can be used in the addCell method.
+     */
+    _calculateCellProperties: function (originPlot, destinationPlot) {
+        var rowDiff = destinationPlot[1] - originPlot[1],
+            columnDiff = destinationPlot[0] - originPlot[0],
+            lowRow = rowDiff < 0 ? destinationPlot[1] : originPlot[1],
+            lowColumn = columnDiff < 0 ? destinationPlot[0] : originPlot[0],
+            rows = Math.abs(rowDiff) + 1,
+            columns = Math.abs(columnDiff) + 1;
+
+        return [lowRow, lowColumn, rows, columns];
     },
 
     /**
