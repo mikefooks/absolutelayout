@@ -29,12 +29,19 @@ Layout.prototype = {
                 lowRow = Math.min(destinationPlot[1], originPlot[1]),
                 highRow = Math.max(destinationPlot[1], originPlot[1]),
                 lowColumn = Math.min(destinationPlot[0], originPlot[0]),
-                highColumn = Math.max(destinationPlot[0], originPlot[1]);
+                highColumn = Math.max(destinationPlot[0], originPlot[0]);
 
-            console.log(originPlot, destinationPlot);
+            console.log({
+                lowRow: lowRow,
+                highRow: highRow,
+                lowCol: lowColumn,
+                highCol: highColumn,
+                totalColumns: highColumn - lowColumn,
+                totalRows: highRow - lowRow
+            });
 
             if (lowRow < highRow && lowColumn < highColumn) {
-                this.addCell(lowRow, lowColumn, highRow - lowRow, highColumn - lowColumn);
+                this.addCell(lowRow, lowColumn, highRow - lowRow + 1, highColumn - lowColumn + 1);
             }
         }).bind(this));  
     },
