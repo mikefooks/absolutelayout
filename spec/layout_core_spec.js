@@ -41,7 +41,7 @@ describe("internal methods", function () {
             expect(Array.isArray(testPlots)).toBe(true);
             expect(testPlots.length).toBe(3);
             expect(testPlots.every(function (plot) {
-                return typeof plot === "string";
+                return typeof plot == "string";
             })).toBe(true);
 
             testPlots = null;

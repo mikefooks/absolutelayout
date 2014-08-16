@@ -108,13 +108,14 @@ describe("utility functions", function () {
 
             expect(Object.keys(combinedObj).length).toBe(7);
             expect(combinedObj.hasOwnProperty("hey")).toBe(true);
+            expect(combinedObj.hasOwnProperty("four")).toBe(true);
 
             combinedObj = null;
         });
 
         it("objFilter filters object properties", function () {
             filteredObj = objFilter(testObj1, function (prop) {
-                return typeof prop === "string";
+                return typeof prop == "string";
             });
 
             expect(Object.keys(filteredObj).length).toBe(1);

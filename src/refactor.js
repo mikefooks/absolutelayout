@@ -3,28 +3,59 @@
 function Layout(columns, rows, container) {
     this.columns = columns;
     this.rows = rows;
-    this.container = document.querySelector(container);
+    this.container = getElement(container);
+    this.cellClass = "testCell";
 
-    this.height = this.container.clientHeight;
-    this.width = this.container.clientWidth;
+    this.container.setAttribute("draggable", true);
+
+    this._bindDragEvents();
 }
 
 Layout.prototype = {
 
     constructor: Layout,
 
-    set: function (key, value) {
-        this[key] = value;
-        return this;
-    },
+    _bindDragEvents: function () {
+        this.container.addEventListener("dragstart", (function (evt) {
+            var origin = [evt.layerX, evt.layerY];
+            evt.dataTransfer.origin = origin;
+            evt.dataTransfer.originPlot = this._findPlot.apply(this, origin);
+        }).bind(this));
 
-    get: function (key) {
-        return this[key];
+        this.container.addEventListener("dragend", (function (evt) {
+            var destination = [ evt.layerX, evt.layerY ],
+                destinationPlot = this._findPlot.apply(this, destination),
+                originPlot = evt.dataTransfer.originPlot,
+                lowRow = Math.min(destinationPlot[1], originPlot[1]),
+                highRow = Math.max(destinationPlot[1], originPlot[1]),
+                lowColumn = Math.min(destinationPlot[0], originPlot[0]),
+                highColumn = Math.max(destinationPlot[0], originPlot[1]);
+
+            console.log(originPlot, destinationPlot);
+
+            if (lowRow < highRow && lowColumn < highColumn) {
+                this.addCell(lowRow, lowColumn, highRow - lowRow, highColumn - lowColumn);
+            }
+        }).bind(this));  
     },
 
     /**
-     * Creates all the necessary Plot instances, based on the 
-     * Layout's configuration.
+     * Returns the plot corresponding to given x and y coordinates
+     * within the layout element.
+     */
+    _findPlot: function (x, y) {
+        return [
+            Math.floor(x / this.container.clientWidth * this.columns),
+            Math.floor(y / this.container.clientHeight * this.rows)
+        ];
+    },
+
+    /**
+     * Creates all the necessary plots, based on the 
+     * Layout's configuration. A plot is just an imaginary cell, an
+     * unrealized cell, sort of. A plot is basically an abstraction
+     * whose purpose is to hold information about positioning and 
+     * occupancy so that cells can be placed correctly.
      */
     refresh: function () {
         var plots = this.plots || (this.plots = {}),
@@ -137,6 +168,8 @@ Layout.prototype = {
             cells = this.cells || (this.cells = []),
             newCell, i;
 
+        console.log(top, left, rows, columns)
+
         // TODO if position check fails, there should be a custom error
         // of some kind.
 
@@ -145,16 +178,23 @@ Layout.prototype = {
                 this.plots[plots[i]].occupied = true;
             }
 
-            return cells.push(new Cell(params, plots, this));
+            cells.push(new Cell(params, plots, this));
+
+            return this;
 
         } else {
-            return false;
+            if (!positionCheck) {
+                console.log("positionCheck failed.");
+            }
+            return this;
         }
     }
 };
 
 function Cell(dimensions, plots, layout) {
     var cellDimensions = layout._cellDimensions(dimensions[2], dimensions[3]),
+        
+        // TODO: Need better way to assign cellClass to layout.
         newEl = createEl("div", { class: layout.cellClass }),
         elStyles;
 
@@ -190,15 +230,17 @@ Cell.prototype = {
 function createEl(type, attrs) {
     var el = document.createElement(type);
 
-    if (arguments.length === 1) {
-        return el;        
+    if (arguments.length) {
+        if (arguments.length == 1) {
+            return el;        
+        }
+
+        forIn(attrs, function (val, key) {
+            el.setAttribute(key, val);
+        });
+
+        return el;
     }
-
-    forIn(attrs, function (val, key) {
-        el.setAttribute(key, val);
-    });
-
-    return el;
 }
 
 /**
@@ -232,12 +274,22 @@ function setStyles(el) {
 /**
  * appends a child element to a dom node.
  */
-function appendTo(parent, child, callback) {
-    try {
-        parent.appendChild(child);
-    } catch (err) {
-        callback(err);
-    }
+function appendTo(parent, child) {
+    parent.appendChild(child);
+}
+
+/**
+ * Returns the first node that matches the selector.
+ */
+function getElement(selector) {
+    return document.querySelector(selector);
+}
+
+/**
+ * Returns a nodeList of all the nodes that match the selector.
+ */
+function getElements(selection) {
+    return document.querySelectorAll(selector);
 }
 
 /**
@@ -263,7 +315,7 @@ function forIn(obj, callback, context) {
     var keys = Object.keys(obj),
         i;
 
-    if (!context) { context = this; }
+    context = context || this;
 
     for (i = 0; i < keys.length; i++) {
         callback.call(context, obj[keys[i]], keys[i]);
@@ -279,7 +331,7 @@ function combine() {
         temp = {},
         i, keys;
 
-    if (objects.every(function (obj) { return typeof obj === "object" })) {
+    if (objects.every(function (obj) { return typeof obj == "object" })) {
         for (i = 0; i < objects.length; i++) {
             forIn(objects[i], function (val, key) {
                 temp[key] = val;
