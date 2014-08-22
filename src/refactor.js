@@ -20,20 +20,31 @@ Layout.prototype = {
      */
     _bindDragEvents: function () {
         this.container.addEventListener("dragstart", (function (evt) {
-            var origin = [evt.layerX, evt.layerY];
-            evt.dataTransfer.origin = origin;
-            evt.dataTransfer.originPlot = this._findPlot.apply(this, origin);
-        }).bind(this));
+            var origin = [evt.layerX, evt.layerY] + "",
+                dragImage = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 
-        this.container.addEventListener("dragend", (function (evt) {
-            var destination = [ evt.layerX, evt.layerY ],
-                destinationPlot = this._findPlot.apply(this, destination),
-                originPlot = evt.dataTransfer.originPlot,
+            dragImage.style.height = 0;
+            dragImage.style.width = 0;
+            this.container.appendChild(dragImage);
+
+            evt.dataTransfer.setData("text/plain", origin);
+            evt.dataTransfer.setDragImage(dragImage, 0, 0);
+        }).bind(this), false);
+
+        this.container.addEventListener("dragover", function (evt) {
+            evt.preventDefault();
+        });
+
+        this.container.addEventListener("drop", (function (evt) {
+            var destinationPlot = this._findPlotByCoords(evt.layerX, evt.layerY),
+                origin = evt.dataTransfer.getData("text/plain").split(","),
+                originPlot = this._findPlotByCoords.apply(this, origin),
                 newCellProperties = this._calculateCellProperties(originPlot, destinationPlot);
 
             this.addCell.apply(this, newCellProperties);
 
-        }).bind(this));  
+            evt.preventDefault();
+        }).bind(this), false);  
     },
 
     /**
@@ -55,7 +66,7 @@ Layout.prototype = {
      * Returns the plot corresponding to given x and y coordinates
      * within the layout element.
      */
-    _findPlot: function (x, y) {
+    _findPlotByCoords: function (x, y) {
         return [
             Math.floor(x / this.container.clientWidth * this.columns),
             Math.floor(y / this.container.clientHeight * this.rows)
@@ -96,8 +107,7 @@ Layout.prototype = {
     },
 
     /**
-     * Finds the dimensions for a new plot or cell based on given
-     * dimensions in rows and columns.
+     * Finds the dimensions in % from dimensions given in rows and columns.
      */
     _cellDimensions: function (row, column) {
         return {
@@ -179,8 +189,6 @@ Layout.prototype = {
             positionCheck = this._checkPosition(plots),
             cells = this.cells || (this.cells = []),
             newCell, i;
-
-        console.log(top, left, rows, columns)
 
         // TODO if position check fails, there should be a custom error
         // of some kind.
@@ -265,13 +273,13 @@ function setStyles(el) {
         keys, i;
 
     // if using two strings to set a single style property.
-    if (styleParams.length === 2 && styleParams.every(function (param) {
-        return typeof param === "string";
+    if (styleParams.length == 2 && styleParams.every(function (param) {
+        return typeof param == "string";
     })) {
         el.style[styleParams[0]] = styleParams[1];
 
     // if using an object literal to set multiple style properties.
-    } else if (styleParams.length === 1 && typeof styleParams === "object") {
+    } else if (styleParams.length == 1 && typeof styleParams == "object") {
         keys = Object.keys(styleParams[0]);
 
         for (i = 0; i < keys.length; i++) {
