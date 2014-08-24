@@ -21,7 +21,10 @@ Controls.prototype = {
          * common drag events which pertain to all drag behaviors.
          */
         this._listen("dragStart", function (evt) {
-            this.dragCache.origin = [ evt.layerX, evt.layerY ];
+            var layoutPositionX = evt.pageX - this.layoutOffset.x,
+                layoutPositionY = evt.pageY - this.layoutOffset.y;
+
+            this.dragCache.origin = [ layoutPositionX, layoutPositionY ];
             this.dragCache.isDragging = true;
         }, this);
 
@@ -34,18 +37,22 @@ Controls.prototype = {
          * about the cell currently being created.
          */
         this._listen("dragStart", function (evt) {
-            var reticle = document.createElement("div");
+            var reticle = document.createElement("div"),
+                layoutPositionX = evt.pageX - this.layoutOffset.x,
+                layoutPositionY = evt.pageY - this.layoutOffset.y;
             
             reticle.classList.add(this.reticleClass);
             reticle.style.left = this.dragCache.origin[0] + "px";
             reticle.style.top = this.dragCache.origin[1] + "px";
-            reticle.style.width = evt.layerX - this.dragCache.origin[0] + "px";
-            reticle.style.height = evt.layerY - this.dragCache.origin[1] + "px";
+            reticle.style.width = layoutPositionX - this.dragCache.origin[0] + "px";
+            reticle.style.height = layoutPositionY - this.dragCache.origin[1] + "px";
 
             this.dragCache.reticle = reticle;
             this.layout.container.appendChild(reticle);
         }, this);
 
+        // allows the selection box to expand, contract given the current 
+        // mouse position.
         this._listen("dragOver", function (evt) {
             var d = this.dragCache,
                 layoutPositionX = evt.pageX - this.layoutOffset.x,
@@ -86,8 +93,10 @@ Controls.prototype = {
         this._listen("dragEnd", function (evt) {
             var findPlot = this.layout._findPlotByCoords.bind(this.layout),
                 origin = this.dragCache.origin,
+                layoutPositionX = evt.pageX - this.layoutOffset.x,
+                layoutPositionY = evt.pageY - this.layoutOffset.y,
                 originPlot = findPlot(origin[0], origin[1]),
-                destPlot = findPlot(evt.layerX, evt.layerY),
+                destPlot = findPlot(layoutPositionX, layoutPositionY),
                 newCellProperties = this.layout._cellProperties(originPlot, destPlot);
 
             this.layout.addCell.apply(this.layout, newCellProperties);
@@ -107,9 +116,7 @@ Controls.prototype = {
         }).bind(this), false);
 
         layout.container.addEventListener("mouseup", (function (evt) {
-            if (!evt.target.classList.contains(layout.cellClass)) {
-                this._fire("dragEnd", evt);               
-            }
+            this._fire("dragEnd", evt);               
         }).bind(this), false);
 
         return this;
