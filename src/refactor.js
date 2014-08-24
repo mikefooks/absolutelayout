@@ -3,7 +3,7 @@
 function Layout(columns, rows, container) {
     this.columns = columns;
     this.rows = rows;
-    this.container = getElement(container);
+    this.el = getElement(container);
     this.cellClass = "testCell";
 }
 
@@ -54,7 +54,7 @@ Layout.prototype = {
             dimensions = this._cellDimensions(rows, columns),
             cells = this.cells || (this.cells = []),
             firstPlot = this.plots[top + "-" + left],
-            el, i;
+            el, idInput, idDisplay, i;
 
         if (Array.isArray(plots) && positionCheck) {
             for (i = 0; i < plots.length; i++) {
@@ -69,18 +69,28 @@ Layout.prototype = {
             el.style.top = firstPlot.css.top;
             el.style.left = firstPlot.css.left;
 
+            idInput = document.createElement("input");
+            idInput.setAttribute("type", "text");
+            idInput.style.visibility = "hidden";
+            el.appendChild(idInput);
+
+            idDisplay = document.createElement("span");
+            idDisplay.classList.add("id_display");
+            el.appendChild(idDisplay);
+
             cells.push({
+                id: "",
                 plots: plots,
                 el: el
             });
 
-            this.container.appendChild(el);
+            this.el.appendChild(el);
 
-        } else {
-            if (!positionCheck) {
-                console.log("positionCheck failed.");
-            }
+        } else if (!positionCheck) {
+            console.log("positionCheck failed.");
         }
+
+        return el;
     },
 
     /**
@@ -104,8 +114,8 @@ Layout.prototype = {
      */
     _findPlotByCoords: function (x, y) {
         return [
-            Math.floor(x / this.container.clientWidth * this.columns),
-            Math.floor(y / this.container.clientHeight * this.rows)
+            Math.floor(x / this.el.clientWidth * this.columns),
+            Math.floor(y / this.el.clientHeight * this.rows)
         ];
     },
 

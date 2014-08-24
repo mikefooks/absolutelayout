@@ -11,11 +11,13 @@ Controls.prototype = {
         this.reticleClass = "reticle";
         this.layout = layout;
         this.layoutOffset = {
-            x: layout.container.offsetLeft,
-            y: layout.container.offsetTop
+            x: layout.el.offsetLeft,
+            y: layout.el.offsetTop
         }; 
         this.events = {};
         this.dragCache = {};
+        this.inputFormShowing = false;
+        this.activeCell;
 
         /**
          * common drag events which pertain to all drag behaviors.
@@ -48,11 +50,9 @@ Controls.prototype = {
             reticle.style.height = layoutPositionY - this.dragCache.origin[1] + "px";
 
             this.dragCache.reticle = reticle;
-            this.layout.container.appendChild(reticle);
+            this.layout.el.appendChild(reticle);
         }, this);
 
-        // allows the selection box to expand, contract given the current 
-        // mouse position.
         this._listen("dragOver", function (evt) {
             var d = this.dragCache,
                 layoutPositionX = evt.pageX - this.layoutOffset.x,
@@ -63,16 +63,13 @@ Controls.prototype = {
             if (xMove == "right") {
                 d.reticle.style.width = layoutPositionX - d.origin[0] + "px";
             }
-
             if (xMove == "left") {
                 d.reticle.style.left = layoutPositionX + "px";
                 d.reticle.style.width = -(layoutPositionX - d.origin[0]) + "px";
             }
-
             if (yMove == "down") {
                 d.reticle.style.height = layoutPositionY - d.origin[1] + "px";        
             }
-
             if (yMove == "up") {
                 d.reticle.style.top = layoutPositionY + "px";
                 d.reticle.style.height = -(layoutPositionY - d.origin[1]) + "px";
@@ -80,9 +77,32 @@ Controls.prototype = {
         }, this);
 
         this._listen("dragEnd", function (evt) {
-            this.layout.container.removeChild(this.dragCache.reticle);
+            if (this.dragCache.reticle) {
+                this.layout.el.removeChild(this.dragCache.reticle);
+            }
             this.dragCache.reticle = null;
         }, this);
+
+        /**
+         * events which shows a cell's input elements, which can be
+         * used to update the id and other properties.
+         */
+        this._listen("revealCellForm", function (evt) {
+            var targetCell = this.activeCell = evt.target,
+                input = targetCell.querySelector("input[type='text']");
+
+            this.inputFormShowing = true;
+
+            input.style.visibility = "visible";
+            input.focus();
+        }, this);
+
+        this._listen("hideCellForm", function (evt) {
+            var input = this.activeCell.querySelector("input[type='text']");
+
+            this.inputFormShowing = false;
+            input.style.visibility = "hidden";
+        });
 
         /**
          * drag events which pertain to the construction of a
@@ -97,29 +117,46 @@ Controls.prototype = {
                 layoutPositionY = evt.pageY - this.layoutOffset.y,
                 originPlot = findPlot(origin[0], origin[1]),
                 destPlot = findPlot(layoutPositionX, layoutPositionY),
-                newCellProperties = this.layout._cellProperties(originPlot, destPlot);
+                newCellProperties = this.layout._cellProperties(originPlot, destPlot),
+                newCell;
 
             this.layout.addCell.apply(this.layout, newCellProperties);
         }, this);
 
 
         // The mouse event binding which actually ftrigger our events.
-        layout.container.addEventListener("mousedown", (function (evt) {;
-            this._fire("dragStart", evt);
+        layout.el.addEventListener("mousedown", (function (evt) {
+            var target = evt.target.className,
+                cell = this.layout.cellClass,
+                layout = this.layout.el.className;
+
+            if (target == layout) {
+                if (this.inputFormShowing) {
+                    this._fire("hideCellForm", evt);
+                }
+                this._fire("dragStart", evt);
+            } 
+            if (target == cell) {
+                if (this.inputFormShowing) {
+                    this._fire("hideCellForm", evt);
+                } else {
+                    this._fire("revealCellForm", evt);
+                }
+            }
             evt.preventDefault();
         }).bind(this), false);
 
-        layout.container.addEventListener("mousemove", (function (evt) {
+        layout.el.addEventListener("mousemove", (function (evt) {
             if (this.dragCache.isDragging) {
-                this._fire("dragOver", evt);                
-            }   
+                this._fire("dragOver", evt);
+            }  
         }).bind(this), false);
 
-        layout.container.addEventListener("mouseup", (function (evt) {
-            this._fire("dragEnd", evt);               
+        layout.el.addEventListener("mouseup", (function (evt) {
+            if (this.dragCache.isDragging) {
+                this._fire("dragEnd", evt);
+            }              
         }).bind(this), false);
-
-        return this;
     },
 
     /**
