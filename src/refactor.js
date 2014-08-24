@@ -81,7 +81,7 @@ Layout.prototype = {
                 console.log("positionCheck failed.");
             }
         }
-    }
+    },
 
     /**
      * Takes an origin and destination plot from the drag event handler
