@@ -9,85 +9,85 @@ Controls.prototype = {
      */
     init: function (layout) {
         var _this = this;
-        this.reticleClass = "reticle";
+        this.selectorClass = "reticle";
         this.layout = layout;
         this.layoutOffset = {
             x: layout.el.offsetLeft,
             y: layout.el.offsetTop
         }; 
         this.events = {};
-        this.newCellDrag = {};
+        this.selectorDrag = {};
         this.resizeDrag = {};
-
-        /**
-         * common drag events which pertain to all drag behaviors.
-         */
-        this._listen("selectDragStart", function (evt) {
-            var layoutPositionX = evt.pageX - this.layoutOffset.x,
-                layoutPositionY = evt.pageY - this.layoutOffset.y;
-
-            this.newCellDrag.origin = [ layoutPositionX, layoutPositionY ];
-            this.newCellDrag.isDragging = true;
-        }, this);
-
-        this._listen("selectDragEnd", function (evt) {
-            this.newCellDrag.isDragging = false;
-        }, this);
+        this.moveDrag = {};
 
         /**
          * drag events pertaining to the new cell selection box, which gives visual
          * feedback about the cell currently being created.
          */
-        this._listen("selectDragStart", function (evt) {
-            var reticle = document.createElement("div"),
-                layoutPositionX = evt.pageX - this.layoutOffset.x,
-                layoutPositionY = evt.pageY - this.layoutOffset.y;
+        this._listen("selectStart", injectLayerCoordinates(function (evt, coords) {
+            var el = document.createElement("div");
+
+            this.selectorDrag.origin = [ coords.x, coords.y ];
             
-            reticle.classList.add(this.reticleClass);
-            reticle.style.left = this.newCellDrag.origin[0] + "px";
-            reticle.style.top = this.newCellDrag.origin[1] + "px";
-            reticle.style.width = layoutPositionX - this.newCellDrag.origin[0] + "px";
-            reticle.style.height = layoutPositionY - this.newCellDrag.origin[1] + "px";
+            el.classList.add(this.selectorClass);
+            el.style.left = this.selectorDrag.origin[0] + "px";
+            el.style.top = this.selectorDrag.origin[1] + "px";
+            el.style.width = coords.x - this.selectorDrag.origin[0] + "px";
+            el.style.height = coords.y - this.selectorDrag.origin[1] + "px";
 
-            this.newCellDrag.reticle = reticle;
-            this.layout.el.appendChild(reticle);
-        }, this);
+            this.selectorDrag.isDragging = true;
+            this.selectorDrag.el = el;
+            this.layout.el.appendChild(el);
+        }));
 
-        this._listen("selectDragOver", function (evt) {
-            var d = this.newCellDrag,
-                layoutPositionX = evt.pageX - this.layoutOffset.x,
-                layoutPositionY = evt.pageY - this.layoutOffset.y,
-                xMove = layoutPositionX > d.origin[0] ? "right" : "left",
-                yMove = layoutPositionY > d.origin[1] ? "down" : "up";
+        this._listen("selectOver", injectLayerCoordinates(function (evt, coords) {
+            var d = this.selectorDrag,
+                xMove = coords.x > d.origin[0] ? "right" : "left",
+                yMove = coords.y > d.origin[1] ? "down" : "up";
 
             if (xMove == "right") {
-                d.reticle.style.width = layoutPositionX - d.origin[0] + "px";
+                d.el.style.width = coords.x- d.origin[0] + "px";
             }
             if (xMove == "left") {
-                d.reticle.style.left = layoutPositionX + "px";
-                d.reticle.style.width = -(layoutPositionX - d.origin[0]) + "px";
+                d.el.style.left = coords.x + "px";
+                d.el.style.width = -(coords.x - d.origin[0]) + "px";
             }
             if (yMove == "down") {
-                d.reticle.style.height = layoutPositionY - d.origin[1] + "px";        
+                d.el.style.height = coords.y - d.origin[1] + "px";        
             }
             if (yMove == "up") {
-                d.reticle.style.top = layoutPositionY + "px";
-                d.reticle.style.height = -(layoutPositionY - d.origin[1]) + "px";
+                d.el.style.top = coords.y + "px";
+                d.el.style.height = -(coords.y - d.origin[1]) + "px";
             }
+        }));
+
+        this._listen("selectEnd", function (evt) {
+            this.layout.el.removeChild(this.selectorDrag.el);
+            this.selectorDrag.isDragging = false;
+            this.selectorDrag.el = null;
         }, this);
 
-        this._listen("selectDragEnd", function (evt) {
-            if (this.newCellDrag.reticle) {
-                this.layout.el.removeChild(this.newCellDrag.reticle);
-            }
-            this.newCellDrag.reticle = null;
-        }, this);
+        /**
+         * drag event which pertain to the construction of a
+         * new cell. Whereas the previous three handlers merely show and mutate
+         * the selection box, this function employs the necessary layout
+         * methods to actually construct and append the cell.
+         */
+        this._listen("selectEnd", injectLayerCoordinates(function (evt, coords) {
+            var findPlot = this.layout._findPlotByCoords.bind(this.layout),
+                origin = this.selectorDrag.origin,
+                originPlot = findPlot(origin[0], origin[1]),
+                destPlot = findPlot(coords.x, coords.y),
+                newCellProperties = this.layout._cellProperties(originPlot, destPlot),
+                newCell;
+
+            this.layout.addCell.apply(this.layout, newCellProperties);
+        }));
 
         /**
          * events which pertain to the resizing of a cell using the resizeX, 
          * resizeY and resizeXY bars on the sides of the cell.
          */
-        
         this._listen("resizeX", injectLayerCoordinates(function (evt, coords) {
             console.log(coords.x, coords.y);
         }));
@@ -98,28 +98,10 @@ Controls.prototype = {
 
 
         /**
-         * drag events which pertain to the construction of a
-         * new cell. The selectDragStart merely stores the location of the initial
-         * mousedown event. The selectDragEnd employs all the necessary layer methods
-         * in order to calculate the properties and create the new cell.
+         * The mouse event bindings which actually trigger our events.
          */
-        this._listen("selectDragEnd", function (evt) {
-            var findPlot = this.layout._findPlotByCoords.bind(this.layout),
-                origin = this.newCellDrag.origin,
-                layoutPositionX = evt.pageX - this.layoutOffset.x,
-                layoutPositionY = evt.pageY - this.layoutOffset.y,
-                originPlot = findPlot(origin[0], origin[1]),
-                destPlot = findPlot(layoutPositionX, layoutPositionY),
-                newCellProperties = this.layout._cellProperties(originPlot, destPlot),
-                newCell;
-
-            this.layout.addCell.apply(this.layout, newCellProperties);
-        }, this);
-
-
-        // The mouse event binding which actually ftrigger our events.
         layout.el.addEventListener("mousedown", matchTarget("layoutBox", function (evt) {
-            this._fire("selectDragStart", evt);
+            this._fire("selectStart", evt);
         }, this), false);
 
         layout.el.addEventListener("mousedown", matchTarget("resizeY", function (evt) {
@@ -131,20 +113,20 @@ Controls.prototype = {
         }, this), false); 
 
         layout.el.addEventListener("mousemove", (function (evt) {
-            if (this.newCellDrag.isDragging) {
-                this._fire("selectDragOver", evt);
+            if (this.selectorDrag.isDragging) {
+                this._fire("selectOver", evt);
             }  
         }).bind(this), false);
 
         layout.el.addEventListener("mouseup", (function (evt) {
-            if (this.newCellDrag.isDragging) {
-                this._fire("selectDragEnd", evt);
+            if (this.selectorDrag.isDragging) {
+                this._fire("selectEnd", evt);
             }              
         }).bind(this), false);
 
-        // Decorates an event handler in order to discriminate which elements
-        // fire and are effected by which handlers. Also does evt.preventDefault()
-        // as a little bonus.
+        // Decorates an event handler in order to discriminate whether the
+        // handler should fire based on the className of the target element. 
+        // Also does evt.preventDefault() as a little bonus.
         function matchTarget(targetName, handler, ctx) {
             return (function (evt) {
                 if (evt.target.className == targetName) {
@@ -154,7 +136,11 @@ Controls.prototype = {
             }).bind(ctx);
         }
 
-        function injectLayerCoordinates(fn) {
+        // Decorates a function passed to the _listen method, which makes the 
+        // coordinates on the layout element available within the handler.
+        function injectLayerCoordinates(fn, ctx) {
+            ctx = ctx || _this;
+
             return (function (evt) {
                 var coordinates = {
                     x: evt.pageX - this.layoutOffset.x,
@@ -162,7 +148,7 @@ Controls.prototype = {
                 };
 
                 fn.call(this, evt, coordinates);
-            }).bind(_this);
+            }).bind(ctx);
         }
     },
 
