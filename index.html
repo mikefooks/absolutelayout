@@ -25,23 +25,7 @@
             position: absolute;
         }
 
-        .idDisplay {
-            position: absolute;
-            height: 24px;
-            width: 90%;
-            top: 0%;
-            left: 0%;
-        }
-
-        .deleteCell {
-            position: absolute;
-            height: 24px;
-            width: 10%;
-            top: 0%;
-            left: 90%;
-        }
-
-        .resizeX {
+        .resize_east {
             position: absolute;
             height: 80%;
             width: 24px;
@@ -50,13 +34,31 @@
             cursor: e-resize;
         }
 
-        .resizeY {
+        .resize_south {
             position: absolute;
             height: 24px;
-            width: 90%;
+            width: 80%;
             bottom: 0%;
-            left: 0%;
+            left: 10%;
             cursor: s-resize;
+        }
+
+        .resize_west {
+            position: absolute;
+            height: 80%;
+            width: 24px;
+            top: 10%;
+            left: 0%;
+            cursor: w-resize;
+        }
+
+        .resize_north {
+            position: absolute;
+            height: 24px;
+            width: 80%;
+            top: 0%;
+            left: 10%;
+            cursor: n-resize;
         }
 
         .resizeXY {

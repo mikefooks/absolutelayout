@@ -50,23 +50,22 @@ Layout.prototype = {
      */
     addCell: function (top, left, rows, columns) {
         var plots = this._getPlots.call(null, top, left, rows, columns),
-            positionCheck = this._checkPosition(plots),
+            isClear = this._checkPosition(plots),
             dimensions = this._cellDimensions(rows, columns),
             cells = this.cells || (this.cells = []),
             firstPlot = this.plots[top + "-" + left],
             el, innerElClasses, i;
 
-        if (Array.isArray(plots) && positionCheck) {
+        if (Array.isArray(plots) && isClear) {
             for (i = 0; i < plots.length; i++) {
                 this.plots[plots[i]].occupied = true;
             }
 
             innerElClasses = [
-                "idDisplay",
-                "deleteCell",
-                "resizeX",
-                "resizeY",
-                "resizeXY"
+                "resize_east",
+                "resize_south",
+                "resize_west",
+                "resize_north"
             ];
 
             el = document.createElement("div");
@@ -91,8 +90,8 @@ Layout.prototype = {
 
             this.el.appendChild(el);
 
-        } else if (!positionCheck) {
-            console.log("positionCheck failed.");
+        } else if (!isClear) {
+            console.log("isClear failed.");
         }
 
         return el;

@@ -24,8 +24,9 @@ Controls.prototype = {
          * drag events pertaining to the new cell selection box, which gives visual
          * feedback about the cell currently being created.
          */
-        this._listen("selectStart", injectLayerCoordinates(function (evt, coords) {
-            var el = document.createElement("div");
+        this._listen("selectStart", function (evt) {
+            var coords = getLayerCoordinates.call(this, evt),
+                el = document.createElement("div");
 
             this.selectorDrag.origin = [ coords.x, coords.y ];
             
@@ -38,12 +39,15 @@ Controls.prototype = {
             this.selectorDrag.isDragging = true;
             this.selectorDrag.el = el;
             this.layout.el.appendChild(el);
-        }));
+        });
 
-        this._listen("selectOver", injectLayerCoordinates(function (evt, coords) {
-            var d = this.selectorDrag,
+        this._listen("selectOver", function (evt) {
+            var coords = getLayerCoordinates.call(this, evt),
+                d = this.selectorDrag,
                 xMove = coords.x > d.origin[0] ? "right" : "left",
                 yMove = coords.y > d.origin[1] ? "down" : "up";
+
+            console.log(coords);
 
             if (xMove == "right") {
                 d.el.style.width = coords.x- d.origin[0] + "px";
@@ -59,7 +63,7 @@ Controls.prototype = {
                 d.el.style.top = coords.y + "px";
                 d.el.style.height = -(coords.y - d.origin[1]) + "px";
             }
-        }));
+        });
 
         this._listen("selectEnd", function (evt) {
             this.layout.el.removeChild(this.selectorDrag.el);
@@ -73,8 +77,9 @@ Controls.prototype = {
          * the selection box, this function employs the necessary layout
          * methods to actually construct and append the cell.
          */
-        this._listen("selectEnd", injectLayerCoordinates(function (evt, coords) {
-            var findPlot = this.layout._findPlotByCoords.bind(this.layout),
+        this._listen("selectEnd", function (evt) {
+            var coords = getLayerCoordinates.call(this, evt),
+                findPlot = this.layout._findPlotByCoords.bind(this.layout),
                 origin = this.selectorDrag.origin,
                 originPlot = findPlot(origin[0], origin[1]),
                 destPlot = findPlot(coords.x, coords.y),
@@ -82,35 +87,28 @@ Controls.prototype = {
                 newCell;
 
             this.layout.addCell.apply(this.layout, newCellProperties);
-        }));
+        });
 
         /**
          * events which pertain to the resizing of a cell using the resizeX, 
          * resizeY and resizeXY bars on the sides of the cell.
          */
-        this._listen("resizeX", injectLayerCoordinates(function (evt, coords) {
-            console.log(coords.x, coords.y);
-        }));
-
-        this._listen("resizeY", function (evt) {
-            console.log("resizing Y");
-        }, this);
-
+        this._listen("resizeStart", function (evt, dir) {
+            console.log(dir);
+        });
 
         /**
          * The mouse event bindings which actually trigger our events.
          */
-        layout.el.addEventListener("mousedown", matchTarget("layoutBox", function (evt) {
-            this._fire("selectStart", evt);
-        }, this), false);
+        layout.el.addEventListener("mousedown", matchTarget(/layoutBox/,
+            function (evt) {
+                this._fire("selectStart", evt);
+            }, this), false);
 
-        layout.el.addEventListener("mousedown", matchTarget("resizeY", function (evt) {
-            this._fire("resizeY", evt);
-        }, this), false);
-
-        layout.el.addEventListener("mousedown", matchTarget("resizeX", function (evt) {
-            this._fire("resizeX", evt);
-        }, this), false); 
+        layout.el.addEventListener("mousedown", matchTarget(/^resize_([a-z]+)$/,
+            function (evt, dir) {
+                this._fire("resizeStart", evt, dir);
+            }, this), false);
 
         layout.el.addEventListener("mousemove", (function (evt) {
             if (this.selectorDrag.isDragging) {
@@ -118,37 +116,43 @@ Controls.prototype = {
             }  
         }).bind(this), false);
 
-        layout.el.addEventListener("mouseup", (function (evt) {
+        document.addEventListener("mouseup", (function (evt) {
             if (this.selectorDrag.isDragging) {
                 this._fire("selectEnd", evt);
             }              
         }).bind(this), false);
 
-        // Decorates an event handler in order to discriminate whether the
-        // handler should fire based on the className of the target element. 
-        // Also does evt.preventDefault() as a little bonus.
-        function matchTarget(targetName, handler, ctx) {
+        /**
+         * Decorates an event handler in order to discriminate whether the 
+         * handler should fire based on the className of the target element.
+         * Takes a RegExp as its first argument and will pass any captured values
+         * along to the event handler as arguments. 
+         * Also does evt.preventDefault() as a little bonus.
+         */
+        function matchTarget(targetRe, handler, ctx) {
             return (function (evt) {
-                if (evt.target.className == targetName) {
-                    handler.call(this, evt);
+                var reTest = targetRe.exec(evt.target.className),
+                    args = [ evt ];
+
+                if (reTest) {
+                    args = reTest.length > 1 ? args.concat(reTest.slice(1)) : args;
+                    handler.apply(this, args);
                 }
+
                 evt.preventDefault();
             }).bind(ctx);
         }
 
-        // Decorates a function passed to the _listen method, which makes the 
-        // coordinates on the layout element available within the handler.
-        function injectLayerCoordinates(fn, ctx) {
-            ctx = ctx || _this;
-
-            return (function (evt) {
-                var coordinates = {
-                    x: evt.pageX - this.layoutOffset.x,
-                    y: evt.pageY - this.layoutOffset.y
-                };
-
-                fn.call(this, evt, coordinates);
-            }).bind(ctx);
+        /**
+         * Just a helper function for finding a mouse event's location on the
+         * main layout regardless of which specific element is actually being
+         * interacted with.
+         */
+        function getLayerCoordinates(evt) {
+            return {
+                x: evt.pageX - this.layoutOffset.x,
+                y: evt.pageY - this.layoutOffset.y
+            };
         }
     },
 
