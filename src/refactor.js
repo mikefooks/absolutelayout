@@ -54,12 +54,20 @@ Layout.prototype = {
             dimensions = this._cellDimensions(rows, columns),
             cells = this.cells || (this.cells = []),
             firstPlot = this.plots[top + "-" + left],
-            el, idInput, idDisplay, i;
+            el, innerElClasses, i;
 
         if (Array.isArray(plots) && positionCheck) {
             for (i = 0; i < plots.length; i++) {
                 this.plots[plots[i]].occupied = true;
             }
+
+            innerElClasses = [
+                "idDisplay",
+                "deleteCell",
+                "resizeX",
+                "resizeY",
+                "resizeXY"
+            ];
 
             el = document.createElement("div");
             el.classList.add(this.cellClass);
@@ -69,14 +77,11 @@ Layout.prototype = {
             el.style.top = firstPlot.css.top;
             el.style.left = firstPlot.css.left;
 
-            idInput = document.createElement("input");
-            idInput.setAttribute("type", "text");
-            idInput.style.visibility = "hidden";
-            el.appendChild(idInput);
-
-            idDisplay = document.createElement("span");
-            idDisplay.classList.add("id_display");
-            el.appendChild(idDisplay);
+            innerElClasses.forEach(function (name) {
+                var controlEl = document.createElement("div");
+                controlEl.className = name;
+                el.appendChild(controlEl);
+            });
 
             cells.push({
                 id: "",
@@ -91,6 +96,18 @@ Layout.prototype = {
         }
 
         return el;
+    },
+
+    /**
+     * Reads off the position and id properties of each cell and returns
+     * a string of useable CSS.
+     */
+    getCss: function () {
+        var cellStyles = this.cells.map(function (cell) {
+            return cell.el.getAttribute("style");
+        });
+
+        return cellStyles.join("\n");
     },
 
     /**

@@ -5,11 +5,6 @@
     <title>Absolute Layouts</title>
     <link rel="stylesheet" href="style/screen.css" />
     <style>
-        .testCell {
-            outline: 1px red dashed;
-            position: absolute;
-        }
-
         .layoutBox {
             position: relative;
             width: 100%;
@@ -23,6 +18,51 @@
         .reticle {
             position: absolute;
             outline: 1px dashed blue;
+        }
+
+        .testCell {
+            outline: 1px red dashed;
+            position: absolute;
+        }
+
+        .idDisplay {
+            position: absolute;
+            height: 24px;
+            width: 90%;
+            top: 0%;
+            left: 0%;
+        }
+
+        .deleteCell {
+            position: absolute;
+            height: 24px;
+            width: 10%;
+            top: 0%;
+            left: 90%;
+        }
+
+        .resizeX {
+            position: absolute;
+            height: 80%;
+            width: 24px;
+            top: 10%;
+            right: 0%;
+        }
+
+        .resizeY {
+            position: absolute;
+            height: 24px;
+            width: 90%;
+            bottom: 0%;
+            left: 0%;
+        }
+
+        .resizeXY {
+            position: absolute;
+            height: 24px;
+            width: 10%;
+            bottom: 0%;
+            right: 0%;
         }
     </style>
 </head>
