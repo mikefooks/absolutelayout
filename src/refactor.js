@@ -87,9 +87,7 @@ Layout.prototype = {
                 el: el,
                 plots: plots,
                 rows: rows,
-                columns: columns,
-                top: top,
-                left: left
+                columns: columns
             });
 
             this.el.appendChild(el);

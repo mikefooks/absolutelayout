@@ -136,6 +136,7 @@ Controls.prototype = {
             this.resizeDrag.isDragging = true;
             this.resizeDrag.dir = dir;
             this.resizeDrag.activeCell = activeCell;
+            this.resizeDrag.cellOffset = getCellOffset(activeCell.el);
 
             this.layout.el.appendChild(el);
         };
@@ -145,14 +146,28 @@ Controls.prototype = {
                 origin = this.resizeDrag.origin,
                 el = this.resizeDrag.el,
                 dir = this.resizeDrag.dir,
+                offset = this.resizeDrag.cellOffset,
                 distance = {
                     x: coords.x - origin.x,
                     y: coords.y - origin.y
-                },
-                currentSize;
+                };
 
             if (dir == "south") {
-                el.style.height = distance + "px";
+                el.style.height = distance.y + "px";
+            }
+
+            if (dir == "east") {
+                el.style.width = distance.x + "px";
+            }
+
+            if (dir == "north") {
+                el.style.top = offset.y - (-distance.y) + "px";
+                el.style.height = -distance.y + "px";
+            }
+
+            if (dir == "west") {
+                el.style.left = offset.x - (-distance.x) + "px";
+                el.style.width = -distance.x + "px";
             }
         };
 
@@ -218,6 +233,13 @@ Controls.prototype = {
             return {
                 x: evt.pageX - _this.layoutOffset.x,
                 y: evt.pageY - _this.layoutOffset.y
+            };
+        }
+
+        function getCellOffset(el) {
+            return {
+                x: el.offsetLeft,
+                y: el.offsetTop
             };
         }
 
