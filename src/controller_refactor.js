@@ -88,8 +88,9 @@ Controls.prototype = {
         };
 
         /**
-         * events which pertain to the resizing of a cell using the resizeX, 
-         * resizeY and resizeXY bars on the sides of the cell.
+         * resizeStart, resizeOver and resizeEnd handlers create and mutate the
+         * resize selection element which provides visual feedback on a 
+         * resizing operation.
          */
         var resizeStart = function (evt, side) {
             var coords = getLayerCoordinates.call(this, evt),
@@ -104,6 +105,7 @@ Controls.prototype = {
             if (side == "north" || side == "south") {
                 el.style.width = cellBBox.width + "px";
                 el.style.left = cellBBox.left + "px";
+                el.style.height = "0px";
                 
                 if (side == "south") {
                     el.style.top = cellBBox.bottom + "px";
@@ -115,15 +117,16 @@ Controls.prototype = {
             }
 
             if (side == "west" || side == "east") {
-                el.style.height = activeCell.el.style.height;
-                el.style.top = activeCell.el.style.top;
+                el.style.height = cellBBox.height + "px";
+                el.style.top = cellBBox.top + "px";
+                el.style.width = "0px";
 
                 if (side == "east") {
                     el.style.left = cellBBox.right + "px";
                 }
 
                 if (side == "west") {
-                    el.style.left = activeCell.el.style.left;
+                    el.style.left = cellBBox.left + "px";
                 }
             }
 
@@ -146,35 +149,21 @@ Controls.prototype = {
                 distance = {
                     x: coords.x - origin.x,
                     y: coords.y - origin.y
-                },
-                dir;
+                };
 
-            if (side == "west" || side == "east") {
-                dir = distance.x > 0 ? "right" : "left";
-            }
-
-            if (side == "north" || side == "south") {
-                dir = distance.y > 0 ? "down" : "up";
-            }
-
-            console.log(dir);
-
-            if (dir == "down") {
-                el.style.height = distance.y + "px";
-            }
-
-            if (dir == "right") {
-                el.style.width = distance.x + "px";
-            }
-
-            if (dir == "up") {
-                el.style.top = cellBBox.top - (-distance.y) + "px";
-                el.style.height = -distance.y + "px";
-            }
-
-            if (dir == "left") {
-                el.style.left = cellBBox.left - (-distance.x) + "px";
-                el.style.width = -distance.x + "px";
+            switch (side) {
+                case "north":
+                    el.style.top = cellBBox.top + distance.y + "px";
+                    break;
+                case "south":
+                    el.style.top = cellBBox.bottom + distance.y + "px";
+                    break;
+                case "west":
+                    el.style.left = cellBBox.left + distance.x + "px";
+                    break;
+                case "east":
+                    el.style.left = cellBBox.right + distance.x + "px";
+                    break;
             }
         };
 
