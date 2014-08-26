@@ -84,8 +84,12 @@ Layout.prototype = {
 
             cells.push({
                 id: "",
+                el: el,
                 plots: plots,
-                el: el
+                rows: rows,
+                columns: columns,
+                top: top,
+                left: left
             });
 
             this.el.appendChild(el);
