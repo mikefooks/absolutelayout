@@ -49,7 +49,7 @@ Controls.prototype = {
                 yMove = coords.y > d.origin.y ? "down" : "up";
 
             if (xMove == "right") {
-                d.el.style.width = coords.x- d.origin.x + "px";
+                d.el.style.width = coords.x - d.origin.x + "px";
             }
             if (xMove == "left") {
                 d.el.style.left = coords.x + "px";
@@ -91,42 +91,38 @@ Controls.prototype = {
          * events which pertain to the resizing of a cell using the resizeX, 
          * resizeY and resizeXY bars on the sides of the cell.
          */
-        var resizeStart = function (evt, dir) {
+        var resizeStart = function (evt, side) {
             var coords = getLayerCoordinates.call(this, evt),
                 activeCell = this.layout.cells.filter(function (cell) {
                     return cell.el == evt.target.parentNode;
                 })[0],
-                el = document.createElement("div"),
+                cellBBox = getCellBoundingBox(activeCell.el),
+                el = document.createElement("div");
 
-                cellBottom = parseInt(activeCell.el.style.height, 10) +
-                    parseInt(activeCell.el.style.top, 10) + "%",
-                cellRight = parseInt(activeCell.el.style.width, 10) +
-                    parseInt(activeCell.el.style.left, 10) + "%";
-            
             el.className = this.resizerClass;
 
-            if (dir == "north" || dir == "south") {
-                el.style.width = activeCell.el.style.width;
-                el.style.left = activeCell.el.style.left;
+            if (side == "north" || side == "south") {
+                el.style.width = cellBBox.width + "px";
+                el.style.left = cellBBox.left + "px";
                 
-                if (dir == "south") {
-                    el.style.top = cellBottom;
+                if (side == "south") {
+                    el.style.top = cellBBox.bottom + "px";
                 }
 
-                if (dir == "north") {
-                    el.style.top = activeCell.el.style.top;
+                if (side == "north") {
+                    el.style.top = cellBBox.top + "px";
                 }
             }
 
-            if (dir == "west" || dir == "east") {
+            if (side == "west" || side == "east") {
                 el.style.height = activeCell.el.style.height;
                 el.style.top = activeCell.el.style.top;
 
-                if (dir == "east") {
-                    el.style.left = cellRight;
+                if (side == "east") {
+                    el.style.left = cellBBox.right + "px";
                 }
 
-                if (dir == "west") {
+                if (side == "west") {
                     el.style.left = activeCell.el.style.left;
                 }
             }
@@ -134,9 +130,9 @@ Controls.prototype = {
             this.resizeDrag.el = el;
             this.resizeDrag.origin = coords;
             this.resizeDrag.isDragging = true;
-            this.resizeDrag.dir = dir;
+            this.resizeDrag.side = side;
             this.resizeDrag.activeCell = activeCell;
-            this.resizeDrag.cellOffset = getCellOffset(activeCell.el);
+            this.resizeDrag.cellBBox = cellBBox;
 
             this.layout.el.appendChild(el);
         };
@@ -145,28 +141,39 @@ Controls.prototype = {
             var coords = getLayerCoordinates.call(this, evt),
                 origin = this.resizeDrag.origin,
                 el = this.resizeDrag.el,
-                dir = this.resizeDrag.dir,
-                offset = this.resizeDrag.cellOffset,
+                side = this.resizeDrag.side,
+                cellBBox = this.resizeDrag.cellBBox,
                 distance = {
                     x: coords.x - origin.x,
                     y: coords.y - origin.y
-                };
+                },
+                dir;
 
-            if (dir == "south") {
+            if (side == "west" || side == "east") {
+                dir = distance.x > 0 ? "right" : "left";
+            }
+
+            if (side == "north" || side == "south") {
+                dir = distance.y > 0 ? "down" : "up";
+            }
+
+            console.log(dir);
+
+            if (dir == "down") {
                 el.style.height = distance.y + "px";
             }
 
-            if (dir == "east") {
+            if (dir == "right") {
                 el.style.width = distance.x + "px";
             }
 
-            if (dir == "north") {
-                el.style.top = offset.y - (-distance.y) + "px";
+            if (dir == "up") {
+                el.style.top = cellBBox.top - (-distance.y) + "px";
                 el.style.height = -distance.y + "px";
             }
 
-            if (dir == "west") {
-                el.style.left = offset.x - (-distance.x) + "px";
+            if (dir == "left") {
+                el.style.left = cellBBox.left - (-distance.x) + "px";
                 el.style.width = -distance.x + "px";
             }
         };
@@ -236,10 +243,23 @@ Controls.prototype = {
             };
         }
 
-        function getCellOffset(el) {
+
+        /**
+         * Gets the cell's bounding box, corrected to its location relative to
+         * its parent element.
+         */
+        function getCellBoundingBox(el) {
+            var bbox = el.getBoundingClientRect(),
+                offsetLeft = el.offsetLeft,
+                offsetTop = el.offsetTop;
+
             return {
-                x: el.offsetLeft,
-                y: el.offsetTop
+                height: bbox.height,
+                width: bbox.width,
+                top: bbox.top - _this.layoutOffset.y,
+                left: bbox.left - _this.layoutOffset.x,
+                bottom: bbox.bottom - _this.layoutOffset.y,
+                right: bbox.right - _this.layoutOffset.x
             };
         }
 
