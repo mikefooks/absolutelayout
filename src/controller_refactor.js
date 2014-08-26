@@ -9,7 +9,8 @@ Controls.prototype = {
      */
     init: function (layout) {
         var _this = this;
-        this.selectorClass = "reticle";
+        this.selectorClass = "selector";
+        this.resizerClass = "resizer";
         this.layout = layout;
         this.layoutOffset = {
             x: layout.el.offsetLeft,
@@ -30,7 +31,7 @@ Controls.prototype = {
 
             this.selectorDrag.origin = coords;
             
-            el.classList.add(this.selectorClass);
+            el.className = this.selectorClass;
             el.style.left = coords.x + "px";
             el.style.top = coords.y + "px";
             el.style.width = "0px";
@@ -94,25 +95,69 @@ Controls.prototype = {
             var coords = getLayerCoordinates.call(this, evt),
                 activeCell = this.layout.cells.filter(function (cell) {
                     return cell.el == evt.target.parentNode;
-                })[0];
+                })[0],
+                el = document.createElement("div"),
 
+                cellBottom = parseInt(activeCell.el.style.height, 10) +
+                    parseInt(activeCell.el.style.top, 10) + "%",
+                cellRight = parseInt(activeCell.el.style.width, 10) +
+                    parseInt(activeCell.el.style.left, 10) + "%";
+            
+            el.className = this.resizerClass;
+
+            if (dir == "north" || dir == "south") {
+                el.style.width = activeCell.el.style.width;
+                el.style.left = activeCell.el.style.left;
+                
+                if (dir == "south") {
+                    el.style.top = cellBottom;
+                }
+
+                if (dir == "north") {
+                    el.style.top = activeCell.el.style.top;
+                }
+            }
+
+            if (dir == "west" || dir == "east") {
+                el.style.height = activeCell.el.style.height;
+                el.style.top = activeCell.el.style.top;
+
+                if (dir == "east") {
+                    el.style.left = cellRight;
+                }
+
+                if (dir == "west") {
+                    el.style.left = activeCell.el.style.left;
+                }
+            }
+
+            this.resizeDrag.el = el;
             this.resizeDrag.origin = coords;
             this.resizeDrag.isDragging = true;
+            this.resizeDrag.dir = dir;
             this.resizeDrag.activeCell = activeCell;
+
+            this.layout.el.appendChild(el);
         };
 
-        var resizeOver = function (evt, dir) {
+        var resizeOver = function (evt) {
             var coords = getLayerCoordinates.call(this, evt),
                 origin = this.resizeDrag.origin,
+                el = this.resizeDrag.el,
+                dir = this.resizeDrag.dir,
                 distance = {
                     x: coords.x - origin.x,
                     y: coords.y - origin.y
-                };
+                },
+                currentSize;
 
-            console.log(distance);
+            if (dir == "south") {
+                el.style.height = distance + "px";
+            }
         };
 
         var resizeEnd = function (evt) {
+            this.layout.el.removeChild(this.resizeDrag.el);
             this.resizeDrag = {};
         };
 
@@ -126,10 +171,10 @@ Controls.prototype = {
 
         layout.el.addEventListener("mousemove", (function (evt) {
             if (this.selectorDrag.isDragging) {
-                matchTarget(/^layoutBox/, selectOver).call(this, evt);
+                selectOver.call(this, evt);
             }
             if (this.resizeDrag.isDragging) {
-                matchTarget(/^resize_([a-z]+)$/, resizeOver).call(this, evt);
+                resizeOver.call(this, evt);
             }
         }).bind(this), false);
 
@@ -175,5 +220,7 @@ Controls.prototype = {
                 y: evt.pageY - _this.layoutOffset.y
             };
         }
+
+        return this;
     }
 };
