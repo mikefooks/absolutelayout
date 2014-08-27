@@ -89,16 +89,15 @@ Layout.prototype = {
         return newCell;
     },
 
-    /**
-     * Reads off the position and id properties of each cell and returns
-     * a string of useable CSS.
-     */
-    getCss: function () {
-        var cellStyles = this.cells.map(function (cell) {
-            return cell.el.getAttribute("style");
-        });
+    resizeCell: function (id, distance, dir) {
+        var rowWidth = this.el.clientWidth / this.rows,
+            colWidth = this.el.clientHeight / this.columns,
+            cell = this.cells.filter(function (cell) {
+                return cell.id == id;
+            })[0];
 
-        return cellStyles.join("\n");
+        console.log(cell);
+        console.log(distance);
     },
 
     /**

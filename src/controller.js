@@ -66,8 +66,7 @@ Controls.prototype = {
 
         var selectEnd = function (evt) {
             this.layout.el.removeChild(this.selectorDrag.el);
-            this.selectorDrag.isDragging = false;
-            this.selectorDrag.el = null;            
+            this.selectorDrag = {};           
         };
 
         /**
@@ -77,7 +76,7 @@ Controls.prototype = {
          * append the new cell.
          */    
         var createCell = function (evt, bbox) {
-            var newCell = layout.addCell(bbox),
+            var newCell = this.layout.addCell(bbox),
                 attrKeys, styleKeys, innerElClasses, el;
 
             if (newCell) {
@@ -118,10 +117,12 @@ Controls.prototype = {
          */
         var resizeStart = function (evt, side) {
             var coords = getLayerCoordinates.call(this, evt),
+                cellEl = evt.target.parentNode,
+                id = evt.target.parentNode.dataset.id,
                 activeCell = this.layout.cells.filter(function (cell) {
-                    return cell.el == evt.target.parentNode;
+                    return cell.id == id;
                 })[0],
-                cellBBox = getCellBoundingBox(activeCell.el),
+                cellBBox = getCellBoundingBox(cellEl),
                 el = document.createElement("div");
 
             el.className = this.resizerClass;
@@ -160,6 +161,7 @@ Controls.prototype = {
             this.resizeDrag.side = side;
             this.resizeDrag.activeCell = activeCell;
             this.resizeDrag.cellBBox = cellBBox;
+            this.resizeDrag.id = id;
 
             this.layout.el.appendChild(el);
         };
@@ -174,6 +176,8 @@ Controls.prototype = {
                     x: coords.x - origin.x,
                     y: coords.y - origin.y
                 };
+
+            this.resizeDrag.distance = distance;
 
             switch (side) {
                 case "north":
@@ -197,6 +201,14 @@ Controls.prototype = {
         };
 
         /**
+         * Actually modifies the cell based on the feedback gained from the
+         * resize interaction.
+         */
+        var modifyCell = function (evt, id, distance, side) {
+            this.layout.resizeCell(id, distance, side);
+        };
+
+        /**
          * The mouse event bindings which actually trigger our events.
          */
         layout.el.addEventListener("mousedown", (function (evt) {
@@ -213,17 +225,22 @@ Controls.prototype = {
             }
         }).bind(this), false);
 
-        document.addEventListener("mouseup", (function (evt) {
-            var bbox;
+        document.body.addEventListener("mouseup", (function (evt) {
+            var selectorBBox, resizeDistance, resizeSide, resizeId;
 
             if (this.selectorDrag.isDragging) {
-                bbox = getCellBoundingBox(this.selectorDrag.el);
+                selectorBBox = getCellBoundingBox(this.selectorDrag.el);
 
                 selectEnd.call(this, evt);
-                createCell.call(this, evt, bbox);
+                createCell.call(this, evt, selectorBBox);
             }
             if (this.resizeDrag.isDragging) {
+                resizeDistance = this.resizeDrag.distance;
+                resizeSide = this.resizeDrag.side;
+                resizeId = this.resizeDrag.id;
+
                 resizeEnd.call(this, evt);
+                modifyCell.call(this, evt, resizeId, resizeDistance, resizeSide);
             }
         }).bind(this), false);
 
