@@ -118,19 +118,28 @@ Controls.prototype = {
         var resizeStart = function (evt, side) {
             var coords = getLayerCoordinates.call(this, evt),
                 cellEl = evt.target.parentNode,
+                el = cellEl.cloneNode(true),
                 id = evt.target.parentNode.dataset.id,
-                activeCell = this.layout.cells.filter(function (cell) {
-                    return cell.id == id;
-                })[0],
                 cellBBox = getCellBoundingBox(cellEl);
+
+            while (el.firstChild) {
+                el.removeChild(el.firstChild);
+            }
+
+            el.className = "resizer";
+            el.style.left = cellBBox.left + 5 + "px";
+            el.style.top = cellBBox.top + 5 + "px";
+            el.style.width = cellBBox.width - 10 + "px";
+            el.style.height = cellBBox.height - 10 + "px";
 
             this.resizeDrag.origin = coords;
             this.resizeDrag.isDragging = true;
             this.resizeDrag.side = side;
-            this.resizeDrag.activeCell = activeCell;
-            this.resizeDrag.cellEl = cellEl;
+            this.resizeDrag.el = el;
             this.resizeDrag.cellBBox = cellBBox;
             this.resizeDrag.id = id;
+
+            this.layout.el.appendChild(el);
         };
 
         var resizeOver = function (evt) {
@@ -138,7 +147,7 @@ Controls.prototype = {
                 origin = this.resizeDrag.origin,
                 side = this.resizeDrag.side,
                 cellBBox = this.resizeDrag.cellBBox,
-                cellEl = this.resizeDrag.cellEl,
+                el = this.resizeDrag.el,
                 distance = {
                     x: coords.x - origin.x,
                     y: coords.y - origin.y
@@ -148,31 +157,24 @@ Controls.prototype = {
 
             switch (side) {
                 case "north":
-                    cellEl.style.top = cellBBox.top + distance.y + "px";
-                    cellEl.style.height = cellBBox.height - distance.y + "px";
+                    el.style.top = cellBBox.top + distance.y + "px";
+                    el.style.height = cellBBox.height - distance.y + "px";
                     break;
                 case "south":
-                    cellEl.style.height = cellBBox.height + distance.y + "px";
+                    el.style.height = cellBBox.height + distance.y + "px";
                     break;
                 case "west":
-                    cellEl.style.left = cellBBox.left + distance.x + "px";
-                    cellEl.style.width = cellBBox.width - distance.x + "px";
+                    el.style.left = cellBBox.left + distance.x + "px";
+                    el.style.width = cellBBox.width - distance.x + "px";
                     break;
                 case "east":
-                    cellEl.style.width = cellBBox.width + distance.x + "px";
+                    el.style.width = cellBBox.width + distance.x + "px";
                     break;
             }
         };
 
         var resizeEnd = function (evt) {
-            var cellEl = this.resizeDrag.cellEl,
-                cellBBox = this.resizeDrag.cellBBox;
-
-            cellEl.style.top = cellBBox.top + "px";
-            cellEl.style.left = cellBBox.left + "px";
-            cellEl.style.height = cellBBox.height + "px";
-            cellEl.style.width = cellBBox.width + "px";
-
+            this.layout.el.removeChild(this.resizeDrag.el);
             this.resizeDrag = {};
         };
 
@@ -180,8 +182,8 @@ Controls.prototype = {
          * Actually modifies the cell based on the feedback gained from the
          * resize interaction.
          */
-        var modifyCell = function (evt, id, distance, side) {
-            this.layout.resizeCell(id, distance, side);
+        var modifyCell = function (evt, id, bbox) {
+            this.layout.resizeCell(id, bbox);
         };
 
         /**
@@ -202,7 +204,7 @@ Controls.prototype = {
         }).bind(this), false);
 
         document.body.addEventListener("mouseup", (function (evt) {
-            var selectorBBox, resizeDistance, resizeSide, resizeId;
+            var selectorBBox, resizeId, resizeBBox, div;
 
             if (this.selectorDrag.isDragging) {
                 selectorBBox = getCellBoundingBox(this.selectorDrag.el);
@@ -211,12 +213,11 @@ Controls.prototype = {
                 createCell.call(this, evt, selectorBBox);
             }
             if (this.resizeDrag.isDragging) {
-                resizeDistance = this.resizeDrag.distance;
-                resizeSide = this.resizeDrag.side;
                 resizeId = this.resizeDrag.id;
+                resizeBBox = getCellBoundingBox(this.resizeDrag.el);
 
                 resizeEnd.call(this, evt);
-                modifyCell.call(this, evt, resizeId, resizeDistance, resizeSide);
+                modifyCell.call(this, evt, resizeId, resizeBBox);
             }
         }).bind(this), false);
 
@@ -260,17 +261,16 @@ Controls.prototype = {
          */
         function getCellBoundingBox(el) {
             var bbox = el.getBoundingClientRect(),
-                offsetLeft = el.offsetLeft,
-                offsetTop = el.offsetTop;
+                cellBBox = {
+                    height: bbox.height,
+                    width: bbox.width,
+                    top: bbox.top + window.scrollY - _this.layoutOffset.y,
+                    left: bbox.left + window.scrollX - _this.layoutOffset.x,
+                    bottom: bbox.bottom + window.scrollY - _this.layoutOffset.y,
+                    right: bbox.right + window.scrollX - _this.layoutOffset.x
+                };
 
-            return {
-                height: bbox.height,
-                width: bbox.width,
-                top: bbox.top + window.scrollY - _this.layoutOffset.y,
-                left: bbox.left + window.scrollX - _this.layoutOffset.x,
-                bottom: bbox.bottom + window.scrollY - _this.layoutOffset.y,
-                right: bbox.right + window.scrollX - _this.layoutOffset.x
-            };
+            return cellBBox;
         }
 
         return this;

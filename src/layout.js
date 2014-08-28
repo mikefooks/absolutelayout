@@ -72,15 +72,12 @@ Layout.prototype = {
         return newCell;
     },
 
-    resizeCell: function (id, distance, dir) {
-        var rowWidth = this.el.offsetHeight / this.rows,
-            colWidth = this.el.offsetWidth / this.columns,
-            cell = this.cells.filter(function (cell) {
+    resizeCell: function (id, bbox) {
+        var cell = this.cells.filter(function (cell) {
                 return cell.id == id;
-            })[0];
-
-        console.log(cell);
-        console.log(distance);
+            })[0],
+            newPlots = this._findPlotsByBBox(bbox),
+            plotSetData = this._intersectPlotKeys(cell.plots, newPlots);
     },
 
     /**
@@ -102,22 +99,26 @@ Layout.prototype = {
      * second, and an array of those plots exclusive to the second.
      */
     _intersectPlotKeys: function (currentPlots, enteringPlots) {
-        var intersecting = [],
+        var old = currentPlots.slice(0),
+            intersecting = [],
             entering = [],
             plotIndex, i;
 
+        console.log(old);
+        console.log(enteringPlots);
+
         for (i = 0; i < enteringPlots.length; i++) {
-            plotIndex = currentPlots.indexOf(enteringPlots[i]);
+            plotIndex = old.indexOf(enteringPlots[i]);
 
             if (plotIndex >= 0) {
-                intersecting.push(currentPlots.splice(plotIndex, 1)[0]);
+                intersecting.push(old.splice(plotIndex, 1)[0]);
             } else {
                 entering.push(enteringPlots[i]);
             }
         }
 
         return {
-            old: currentPlots,
+            exiting: old,
             intersecting: intersecting,
             entering: entering
         };
@@ -130,11 +131,11 @@ Layout.prototype = {
      */
     _findPlotsByBBox: function (bbox) {
         var leftCol = this._findColumnByCoord(bbox.left),
-            rightCol = this._findColumnByCoord(bbox.right) + 1,
+            rightCol = this._findColumnByCoord(bbox.right),
             topRow = this._findRowByCoord(bbox.top),
-            bottomRow = this._findRowByCoord(bbox.bottom) + 1,
-            columns = rightCol - leftCol,
-            rows = bottomRow - topRow,
+            bottomRow = this._findRowByCoord(bbox.bottom),
+            columns = rightCol - leftCol + 1,
+            rows = bottomRow - topRow + 1,
             plots = this._getPlots(leftCol, topRow, columns, rows);
 
         return plots;
