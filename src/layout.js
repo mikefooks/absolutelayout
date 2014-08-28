@@ -19,13 +19,11 @@ Layout.prototype = {
      */
     refresh: function () {
         var plots = this.plots || (this.plots = {}),
-            i, j, dimensions;
+            i, j, position;
 
         for (i = 0; i < this.columns; i++) {
             for (j = 0; j < this.rows; j++) {
-                // We use _cellDimensions here to get left and
-                // top values for the plot's location.
-                dimensions = this._cellDimensions(i, j);
+                position = this._cellPosition(i + "-" + j);
 
                 plots[i + "-" + j] = {
                     row: j,
@@ -33,8 +31,8 @@ Layout.prototype = {
                     occupied: false,
                     css: {
                         position: "absolute",
-                        top: dimensions.height,
-                        left: dimensions.width
+                        left: position.left,
+                        top: position.top
                     }
                 };
             }
@@ -49,16 +47,10 @@ Layout.prototype = {
      * and is appended to Layout.container.
      */
     addCell: function (bbox) {
-        var topRow = this._findRowByCoord(bbox.top),
-            bottomRow = this._findRowByCoord(bbox.bottom) + 1,
-            leftCol = this._findColumnByCoord(bbox.left),
-            rightCol = this._findColumnByCoord(bbox.right) + 1,
-            columns = rightCol - leftCol,
-            rows = bottomRow - topRow,
-            plotKeys = this._getPlots(leftCol, topRow, columns, rows),
-            firstPlot =  this.plots[leftCol + "-" + topRow],
+        var plotKeys = this._findPlotsByBBox(bbox),
             isClear = this._checkPosition(plotKeys),
-            dimensions = this._cellDimensions(columns, rows),
+            dimensions = this._cellDimensions(plotKeys),
+            position = this._cellPosition(plotKeys[0]),
             cells = this.cells || (this.cells = []),
             newCell, i;
 
@@ -74,13 +66,11 @@ Layout.prototype = {
                     class: this.cellClass
                 },
                 style: {
-                    left: firstPlot.css.left,
-                    top: firstPlot.css.top,
+                    left: position.left,
+                    top: position.top,
                     width: dimensions.width,
                     height: dimensions.height
-                },
-                rows: rows,
-                columns: columns,
+                }
             };
 
             cells.push(newCell);
@@ -113,6 +103,50 @@ Layout.prototype = {
     })(),
 
     /**
+     * Takes two arrays of plots and returns an object containing three
+     * properties: an array of those plots exclusive to the first, an
+     * array of those plots which are intersected by both the first and
+     * second, and an array of those plots exclusive to the second.
+     */
+    _intersectPlotKeys: function (currentPlots, enteringPlots) {
+        var intersecting = [],
+            entering = [],
+            plotIndex, i;
+
+        for (i = 0; i < enteringPlots.length; i++) {
+            plotIndex = currentPlots.indexOf(enteringPlots[i]);
+
+            if (plotIndex >= 0) {
+                intersecting.push(currentPlots.splice(plotIndex, 1)[0]);
+            } else {
+                entering.push(enteringPlots[i]);
+            }
+        }
+
+        return {
+            old: currentPlots,
+            intersecting: intersecting,
+            entering: entering
+        };
+    },
+
+    /**
+     * Takes an object containing numeric top, left, right and bottom
+     * properties and returns a list of the plots corresponding to that
+     * bounding box.
+     */
+    _findPlotsByBBox: function (bbox) {
+        var leftCol = this._findColumnByCoord(bbox.left),
+            rightCol = this._findColumnByCoord(bbox.right),
+            topRow = this._findRowByCoord(bbox.top),
+            bottomRow = this._findRowByCoord(bbox.bottom),
+            columns = rightCol - leftCol,
+            rows = bottomRow - topRow;
+
+        return this._getPlots(leftCol, topRow, columns, rows);
+    },
+
+    /**
      * find which row a given y-axis pixel coordinate is on.
      */
     _findRowByCoord: function (y) {
@@ -127,9 +161,28 @@ Layout.prototype = {
     },
 
     /**
-     * Finds the dimensions in % from dimensions given in rows and columns.
+     * Provides the left and top values for a given plot.
      */
-    _cellDimensions: function (columns, rows) {
+    _cellPosition: function (plot) {
+        var leftTop = plot.split("-"),
+            left = leftTop[0],
+            top = leftTop[1];
+
+        return {
+            left: ((100 / this.columns) * left) + '%',
+            top: ((100 / this.rows) * top) + '%'
+        };
+    },
+
+    /**
+     * Finds the dimensions in % given an array of plotKeys.
+     */
+    _cellDimensions: function (plotKeys) {
+        var leftTop = plotKeys[0].split("-"),
+            rightBottom = plotKeys.slice(-1)[0].split("-"),
+            columns = rightBottom[0] - leftTop[0],
+            rows = rightBottom[1] - leftTop[1];
+
         return {
             width: ((100 / this.columns) * columns) + '%',
             height: ((100 / this.rows) * rows) + '%'
@@ -187,9 +240,9 @@ Layout.prototype = {
         var plots = [],
             onePlot;
 
-        for (var i = 0 ; i < rows; i += 1) {
-            for (var j = 0 ; j < columns; j += 1) {
-                onePlot = (top + i) + "-" + (left + j);
+        for (var i = 0 ; i < columns; i += 1) {
+            for (var j = 0 ; j < rows; j += 1) {
+                onePlot = (left + i) + "-" + (top + j);
                 plots.push(onePlot);
             }
         }
