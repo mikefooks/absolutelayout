@@ -137,13 +137,16 @@ Layout.prototype = {
      */
     _findPlotsByBBox: function (bbox) {
         var leftCol = this._findColumnByCoord(bbox.left),
-            rightCol = this._findColumnByCoord(bbox.right),
+            rightCol = this._findColumnByCoord(bbox.right) + 1,
             topRow = this._findRowByCoord(bbox.top),
-            bottomRow = this._findRowByCoord(bbox.bottom),
+            bottomRow = this._findRowByCoord(bbox.bottom) + 1,
             columns = rightCol - leftCol,
-            rows = bottomRow - topRow;
+            rows = bottomRow - topRow,
+            plots = this._getPlots(leftCol, topRow, columns, rows);
 
-        return this._getPlots(leftCol, topRow, columns, rows);
+        console.log(plots);
+
+        return plots;
     },
 
     /**
@@ -180,8 +183,8 @@ Layout.prototype = {
     _cellDimensions: function (plotKeys) {
         var leftTop = plotKeys[0].split("-"),
             rightBottom = plotKeys.slice(-1)[0].split("-"),
-            columns = rightBottom[0] - leftTop[0],
-            rows = rightBottom[1] - leftTop[1];
+            columns = rightBottom[0] - leftTop[0] + 1,
+            rows = rightBottom[1] - leftTop[1] + 1;
 
         return {
             width: ((100 / this.columns) * columns) + '%',
