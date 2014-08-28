@@ -266,10 +266,10 @@ Controls.prototype = {
             return {
                 height: bbox.height,
                 width: bbox.width,
-                top: bbox.top - _this.layoutOffset.y,
-                left: bbox.left - _this.layoutOffset.x,
-                bottom: bbox.bottom - _this.layoutOffset.y,
-                right: bbox.right - _this.layoutOffset.x
+                top: bbox.top + window.scrollY - _this.layoutOffset.y,
+                left: bbox.left + window.scrollX - _this.layoutOffset.x,
+                bottom: bbox.bottom + window.scrollY - _this.layoutOffset.y,
+                right: bbox.right + window.scrollX - _this.layoutOffset.x
             };
         }
 

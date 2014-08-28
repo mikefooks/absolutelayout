@@ -23,17 +23,10 @@ Layout.prototype = {
 
         for (i = 0; i < this.columns; i++) {
             for (j = 0; j < this.rows; j++) {
-                position = this._cellPosition(i + "-" + j);
-
                 plots[i + "-" + j] = {
                     row: j,
                     column: i,
-                    occupied: false,
-                    css: {
-                        position: "absolute",
-                        left: position.left,
-                        top: position.top
-                    }
+                    occupied: false
                 };
             }
         }
@@ -143,8 +136,6 @@ Layout.prototype = {
             columns = rightCol - leftCol,
             rows = bottomRow - topRow,
             plots = this._getPlots(leftCol, topRow, columns, rows);
-
-        console.log(plots);
 
         return plots;
     },
