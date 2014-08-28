@@ -122,56 +122,23 @@ Controls.prototype = {
                 activeCell = this.layout.cells.filter(function (cell) {
                     return cell.id == id;
                 })[0],
-                cellBBox = getCellBoundingBox(cellEl),
-                el = document.createElement("div");
+                cellBBox = getCellBoundingBox(cellEl);
 
-            el.className = this.resizerClass;
-
-            if (side == "north" || side == "south") {
-                el.style.width = cellBBox.width + "px";
-                el.style.left = cellBBox.left + "px";
-                el.style.height = "0px";
-                
-                if (side == "south") {
-                    el.style.top = cellBBox.bottom + "px";
-                }
-
-                if (side == "north") {
-                    el.style.top = cellBBox.top + "px";
-                }
-            }
-
-            if (side == "west" || side == "east") {
-                el.style.height = cellBBox.height + "px";
-                el.style.top = cellBBox.top + "px";
-                el.style.width = "0px";
-
-                if (side == "east") {
-                    el.style.left = cellBBox.right + "px";
-                }
-
-                if (side == "west") {
-                    el.style.left = cellBBox.left + "px";
-                }
-            }
-
-            this.resizeDrag.el = el;
             this.resizeDrag.origin = coords;
             this.resizeDrag.isDragging = true;
             this.resizeDrag.side = side;
             this.resizeDrag.activeCell = activeCell;
+            this.resizeDrag.cellEl = cellEl;
             this.resizeDrag.cellBBox = cellBBox;
             this.resizeDrag.id = id;
-
-            this.layout.el.appendChild(el);
         };
 
         var resizeOver = function (evt) {
             var coords = getLayerCoordinates.call(this, evt),
                 origin = this.resizeDrag.origin,
-                el = this.resizeDrag.el,
                 side = this.resizeDrag.side,
                 cellBBox = this.resizeDrag.cellBBox,
+                cellEl = this.resizeDrag.cellEl,
                 distance = {
                     x: coords.x - origin.x,
                     y: coords.y - origin.y
@@ -181,22 +148,31 @@ Controls.prototype = {
 
             switch (side) {
                 case "north":
-                    el.style.top = cellBBox.top + distance.y + "px";
+                    cellEl.style.top = cellBBox.top + distance.y + "px";
+                    cellEl.style.height = cellBBox.height - distance.y + "px";
                     break;
                 case "south":
-                    el.style.top = cellBBox.bottom + distance.y + "px";
+                    cellEl.style.height = cellBBox.height + distance.y + "px";
                     break;
                 case "west":
-                    el.style.left = cellBBox.left + distance.x + "px";
+                    cellEl.style.left = cellBBox.left + distance.x + "px";
+                    cellEl.style.width = cellBBox.width - distance.x + "px";
                     break;
                 case "east":
-                    el.style.left = cellBBox.right + distance.x + "px";
+                    cellEl.style.width = cellBBox.width + distance.x + "px";
                     break;
             }
         };
 
         var resizeEnd = function (evt) {
-            this.layout.el.removeChild(this.resizeDrag.el);
+            var cellEl = this.resizeDrag.cellEl,
+                cellBBox = this.resizeDrag.cellBBox;
+
+            cellEl.style.top = cellBBox.top + "px";
+            cellEl.style.left = cellBBox.left + "px";
+            cellEl.style.height = cellBBox.height + "px";
+            cellEl.style.width = cellBBox.width + "px";
+
             this.resizeDrag = {};
         };
 

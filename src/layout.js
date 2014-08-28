@@ -21,15 +21,15 @@ Layout.prototype = {
         var plots = this.plots || (this.plots = {}),
             i, j, dimensions;
 
-        for (i = 0; i < this.rows; i++) {
-            for (j = 0; j < this.columns; j++) {
+        for (i = 0; i < this.columns; i++) {
+            for (j = 0; j < this.rows; j++) {
                 // We use _cellDimensions here to get left and
                 // top values for the plot's location.
                 dimensions = this._cellDimensions(i, j);
 
                 plots[i + "-" + j] = {
-                    row: i,
-                    column: j,
+                    row: j,
+                    column: i,
                     occupied: false,
                     css: {
                         position: "absolute",
@@ -55,10 +55,10 @@ Layout.prototype = {
             rightCol = this._findColumnByCoord(bbox.right) + 1,
             columns = rightCol - leftCol,
             rows = bottomRow - topRow,
-            plotKeys = this._getPlots(topRow, leftCol, rows, columns),
-            firstPlot =  this.plots[topRow + "-" + leftCol],
+            plotKeys = this._getPlots(leftCol, topRow, columns, rows),
+            firstPlot =  this.plots[leftCol + "-" + topRow],
             isClear = this._checkPosition(plotKeys),
-            dimensions = this._cellDimensions(rows, columns),
+            dimensions = this._cellDimensions(columns, rows),
             cells = this.cells || (this.cells = []),
             newCell, i;
 
@@ -90,8 +90,8 @@ Layout.prototype = {
     },
 
     resizeCell: function (id, distance, dir) {
-        var rowWidth = this.el.clientWidth / this.rows,
-            colWidth = this.el.clientHeight / this.columns,
+        var rowWidth = this.el.offsetHeight / this.rows,
+            colWidth = this.el.offsetWidth / this.columns,
             cell = this.cells.filter(function (cell) {
                 return cell.id == id;
             })[0];
@@ -116,20 +116,20 @@ Layout.prototype = {
      * find which row a given y-axis pixel coordinate is on.
      */
     _findRowByCoord: function (y) {
-        return Math.floor(y / this.el.clientHeight * this.rows);
+        return Math.floor(y / this.el.offsetHeight * this.rows);
     },
 
     /**
      * find which row a given x-axis pixel coordinate is on.
      */
     _findColumnByCoord: function (x) {
-        return Math.floor(x / this.el.clientWidth * this.columns);
+        return Math.floor(x / this.el.offsetWidth * this.columns);
     },
 
     /**
      * Finds the dimensions in % from dimensions given in rows and columns.
      */
-    _cellDimensions: function (rows, columns) {
+    _cellDimensions: function (columns, rows) {
         return {
             width: ((100 / this.columns) * columns) + '%',
             height: ((100 / this.rows) * rows) + '%'
@@ -183,7 +183,7 @@ Layout.prototype = {
      * takes the position and dimension values for a possible cell, and
      * returns the key names of the plots that such a cell would occupy. 
      */
-    _getPlots: function(top, left, rows, columns) {
+    _getPlots: function(left, top, columns, rows) {
         var plots = [],
             onePlot;
 
