@@ -120,7 +120,8 @@ Controls.prototype = {
                 cellEl = evt.target.parentNode,
                 el = cellEl.cloneNode(true),
                 id = evt.target.parentNode.dataset.id,
-                cellBBox = getCellBoundingBox(cellEl);
+                cellBBox = getCellBoundingBox(cellEl),
+                elBBox;
 
             while (el.firstChild) {
                 el.removeChild(el.firstChild);
@@ -136,17 +137,17 @@ Controls.prototype = {
             this.resizeDrag.isDragging = true;
             this.resizeDrag.side = side;
             this.resizeDrag.el = el;
-            this.resizeDrag.cellBBox = cellBBox;
             this.resizeDrag.id = id;
 
             this.layout.el.appendChild(el);
+            this.resizeDrag.elBBox = getCellBoundingBox(el);
         };
 
         var resizeOver = function (evt) {
             var coords = getLayerCoordinates.call(this, evt),
                 origin = this.resizeDrag.origin,
                 side = this.resizeDrag.side,
-                cellBBox = this.resizeDrag.cellBBox,
+                elBBox = this.resizeDrag.elBBox,
                 el = this.resizeDrag.el,
                 distance = {
                     x: coords.x - origin.x,
@@ -157,18 +158,18 @@ Controls.prototype = {
 
             switch (side) {
                 case "north":
-                    el.style.top = cellBBox.top + distance.y + "px";
-                    el.style.height = cellBBox.height - distance.y + "px";
+                    el.style.top = elBBox.top + distance.y + "px";
+                    el.style.height = elBBox.height - distance.y + "px";
                     break;
                 case "south":
-                    el.style.height = cellBBox.height + distance.y + "px";
+                    el.style.height = elBBox.height + distance.y + "px";
                     break;
                 case "west":
-                    el.style.left = cellBBox.left + distance.x + "px";
-                    el.style.width = cellBBox.width - distance.x + "px";
+                    el.style.left = elBBox.left + distance.x + "px";
+                    el.style.width = elBBox.width - distance.x + "px";
                     break;
                 case "east":
-                    el.style.width = cellBBox.width + distance.x + "px";
+                    el.style.width = elBBox.width + distance.x + "px";
                     break;
             }
         };
