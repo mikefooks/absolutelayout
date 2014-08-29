@@ -15,8 +15,7 @@ Controls.prototype = {
         this.layoutOffset = {
             x: layout.el.offsetLeft,
             y: layout.el.offsetTop
-        }; 
-        this.events = {};
+        };
         this.selectorDrag = {};
         this.resizeDrag = {};
         this.moveDrag = {};
@@ -119,7 +118,7 @@ Controls.prototype = {
             var coords = getLayerCoordinates.call(this, evt),
                 cellEl = evt.target.parentNode,
                 el = cellEl.cloneNode(true),
-                id = evt.target.parentNode.dataset.id,
+                id = cellEl.dataset.id,
                 cellBBox = getCellBoundingBox(cellEl),
                 elBBox;
 
@@ -138,6 +137,7 @@ Controls.prototype = {
             this.resizeDrag.side = side;
             this.resizeDrag.el = el;
             this.resizeDrag.id = id;
+            this.resizeDrag.cellEl = cellEl;
 
             this.layout.el.appendChild(el);
             this.resizeDrag.elBBox = getCellBoundingBox(el);
@@ -184,7 +184,17 @@ Controls.prototype = {
          * resize interaction.
          */
         var modifyCell = function (evt, id, bbox) {
-            this.layout.resizeCell(id, bbox);
+            var modifiedCell = this.layout.resizeCell(id, bbox),
+                cellEl = this.resizeDrag.cellEl,
+                styleKeys;
+
+            if (modifiedCell) {
+                styleKeys = Object.keys(modifiedCell.style);
+
+                styleKeys.forEach(function (key) {
+                    cellEl.style[key] = modifiedCell.style[key];
+                });
+            }
         };
 
         /**
@@ -217,8 +227,8 @@ Controls.prototype = {
                 resizeId = this.resizeDrag.id;
                 resizeBBox = getCellBoundingBox(this.resizeDrag.el);
 
-                resizeEnd.call(this, evt);
                 modifyCell.call(this, evt, resizeId, resizeBBox);
+                resizeEnd.call(this, evt);
             }
         }).bind(this), false);
 

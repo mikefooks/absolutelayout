@@ -77,7 +77,38 @@ Layout.prototype = {
                 return cell.id == id;
             })[0],
             newPlots = this._findPlotsByBBox(bbox),
-            plotSetData = this._intersectPlotKeys(cell.plots, newPlots);
+            plotSetData = this._intersectPlotKeys(cell.plots, newPlots),
+            isClear = this._checkPosition(plotSetData.entering),
+            position, dimensions, i;
+
+        if (isClear) {
+            position = this._cellPosition(newPlots[0]);
+            dimensions = this._cellDimensions(newPlots);
+
+            plotSetData.exiting.forEach((function (key) {
+                this.plots[key].occupied = false;
+            }).bind(this));
+
+            plotSetData.entering.forEach((function (key) {
+                this.plots[key].occupied = true;
+            }).bind(this));
+
+            cell.plots = newPlots;
+            cell.style.left = position.left;
+            cell.style.top = position.top;
+            cell.style.width = dimensions.width;
+            cell.style.height = dimensions.height;
+
+            for (i = 0; i < this.cells.length; i++) {
+                if (this.cells[i].id == id) {
+                    this.cells.splice(i, 1);
+                }
+            }
+
+            this.cells.push(cell);
+
+            return cell;
+        }
     },
 
     /**
@@ -103,9 +134,6 @@ Layout.prototype = {
             intersecting = [],
             entering = [],
             plotIndex, i;
-
-        console.log(old);
-        console.log(enteringPlots);
 
         for (i = 0; i < enteringPlots.length; i++) {
             plotIndex = old.indexOf(enteringPlots[i]);
@@ -135,10 +163,9 @@ Layout.prototype = {
             topRow = this._findRowByCoord(bbox.top),
             bottomRow = this._findRowByCoord(bbox.bottom),
             columns = rightCol - leftCol + 1,
-            rows = bottomRow - topRow + 1,
-            plots = this._getPlots(leftCol, topRow, columns, rows);
-
-        return plots;
+            rows = bottomRow - topRow + 1;
+            
+        return this._getPlots(leftCol, topRow, columns, rows);
     },
 
     /**
