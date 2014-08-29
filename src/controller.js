@@ -4,9 +4,6 @@ function Controls() {}
 
 Controls.prototype = {
     constructor: Controls,
-    /**
-     * Kick things off.
-     */
     init: function (layout) {
         var _this = this;
         this.selectorClass = "selector";
@@ -74,7 +71,7 @@ Controls.prototype = {
          * and properties with the layout object to actually construct and 
          * append the new cell.
          */    
-        var createCell = function (evt, bbox) {
+        var createCell = function (bbox) {
             var newCell = this.layout.addCell(bbox),
                 attrKeys, styleKeys, innerElClasses, el;
 
@@ -85,7 +82,8 @@ Controls.prototype = {
                     "resize_east",
                     "resize_south",
                     "resize_west",
-                    "resize_north"
+                    "resize_north",
+                    "move"
                 ];
                 el = document.createElement("div");
 
@@ -107,12 +105,13 @@ Controls.prototype = {
 
                 this.layout.el.appendChild(el);
             }
-        }
+        };
 
         /**
          * resizeStart, resizeOver and resizeEnd handlers create and mutate the
-         * resize selection element which provides visual feedback on a 
-         * resizing operation.
+         * resize selection element which provides visual feedback when
+         * resizing a cell and, ultimately, provides the layout object the
+         * position and dimension information it needs to modify the cell.
          */
         var resizeStart = function (evt, side) {
             var coords = getLayerCoordinates.call(this, evt),
@@ -180,12 +179,11 @@ Controls.prototype = {
         };
 
         /**
-         * Actually modifies the cell based on the feedback gained from the
-         * resize interaction.
+         * Actually modifies the cell based on the feedback gained from either
+         * resize or move actions.
          */
-        var modifyCell = function (evt, id, bbox) {
+        var resizeCell = function (id, bbox, cellEl) {
             var modifiedCell = this.layout.resizeCell(id, bbox),
-                cellEl = this.resizeDrag.cellEl,
                 styleKeys;
 
             if (modifiedCell) {
@@ -198,39 +196,134 @@ Controls.prototype = {
         };
 
         /**
-         * The mouse event bindings which actually trigger our events.
+         * moveStart, moveOver and moveEnd functions move the move selector
+         * over the layout, providing visual feedback as to the progress of
+         * a move operation and ultimately providing the positional and
+         * dimensional information necessary to modify the cell being moved.
          */
-        layout.el.addEventListener("mousedown", (function (evt) {
+        var moveStart = function (evt) {
+            var coords = getLayerCoordinates.call(this, evt),
+                cellEl = evt.target.parentNode,
+                el = cellEl.cloneNode(true),
+                id = cellEl.dataset.id,
+                cellBBox = getCellBoundingBox(cellEl),
+                elBBox;
+
+            while (el.firstChild) {
+                el.removeChild(el.firstChild);
+            }
+
+            el.className = "mover";
+            el.style.left = cellBBox.left + 5 + "px";
+            el.style.top = cellBBox.top + 5 + "px";
+            el.style.width = cellBBox.width - 10 + "px";
+            el.style.height = cellBBox.height - 10 + "px";
+
+            this.moveDrag.origin = coords;
+            this.moveDrag.isDragging = true;
+            this.moveDrag.el = el;
+            this.moveDrag.id = id;
+            this.moveDrag.cellEl = cellEl;
+
+            this.layout.el.appendChild(el);
+            this.moveDrag.elBBox = getCellBoundingBox(el);
+        };
+
+        var moveOver = function (evt) {
+            var coords = getLayerCoordinates.call(this, evt),
+                origin = this.moveDrag.origin,
+                elBBox = this.moveDrag.elBBox,
+                el = this.moveDrag.el,
+                distance = {
+                    x: coords.x - origin.x,
+                    y: coords.y - origin.y
+                };
+
+            this.moveDrag.distance = distance;
+
+            el.style.top = elBBox.top + distance.y + "px";
+            el.style.left = elBBox.left + distance.x + "px";
+        };
+
+        var moveEnd = function (evt) {
+            this.layout.el.removeChild(this.moveDrag.el);
+            this.moveDrag = {};
+        }
+
+        /**
+         * Takes the information acquired from the cell move mouse
+         * operations and undertakes to actually modify the cell to its
+         * new position.
+         */
+        
+        var moveCell = function (id, bbox, cellEl) {
+            var modifiedCell = this.layout.moveCell(id, bbox),
+                styleKeys;
+
+            if (modifiedCell) {
+                styleKeys = Object.keys(modifiedCell.style);
+
+                styleKeys.forEach(function (key) {
+                    cellEl.style[key] = modifiedCell.style[key];
+                });
+            }
+        };
+
+        /**
+         * The mouse event handlers, which actually tie our functionality
+         * to triggered mouse event.
+         */
+        var mouseDownHandler = function (evt) {
             matchTarget(/^layoutBox/, selectStart).call(this, evt);
             matchTarget(/^resize_([a-z]+)$/, resizeStart).call(this, evt);
-        }).bind(this), false);
+            matchTarget(/^move$/, moveStart).call(this, evt);
+        };
 
-        layout.el.addEventListener("mousemove", (function (evt) {
+        var mouseMoveHandler = function (evt) {
             if (this.selectorDrag.isDragging) {
                 selectOver.call(this, evt);
             }
             if (this.resizeDrag.isDragging) {
                 resizeOver.call(this, evt);
             }
-        }).bind(this), false);
+            if (this.moveDrag.isDragging) {
+                moveOver.call(this, evt);
+            }
+        };
 
-        document.body.addEventListener("mouseup", (function (evt) {
-            var selectorBBox, resizeId, resizeBBox, div;
+        var mouseUpHandler = function (evt) {
+            var selectorBBox,
+                resizeId, resizeBBox,
+                moveId, moveBBox,
+                cellEl;
 
             if (this.selectorDrag.isDragging) {
                 selectorBBox = getCellBoundingBox(this.selectorDrag.el);
 
+                createCell.call(this, selectorBBox);
                 selectEnd.call(this, evt);
-                createCell.call(this, evt, selectorBBox);
             }
             if (this.resizeDrag.isDragging) {
                 resizeId = this.resizeDrag.id;
                 resizeBBox = getCellBoundingBox(this.resizeDrag.el);
+                cellEl = this.resizeDrag.cellEl;
 
-                modifyCell.call(this, evt, resizeId, resizeBBox);
+                resizeCell.call(this, resizeId, resizeBBox, cellEl);
                 resizeEnd.call(this, evt);
             }
-        }).bind(this), false);
+            if (this.moveDrag.isDragging) {
+                moveId = this.moveDrag.id;
+                moveBBox = getCellBoundingBox(this.moveDrag.el),
+                cellEl = this.moveDrag.cellEl;
+
+                moveCell.call(this, moveId, moveBBox, cellEl);
+                moveEnd.call(this, evt);
+            }
+        };
+
+        layout.el.addEventListener("mousedown", mouseDownHandler.bind(this), false);
+        layout.el.addEventListener("mousemove", mouseMoveHandler.bind(this), false);
+        document.body.addEventListener("mouseup", mouseUpHandler.bind(this), false);
 
         /**
          * Decorates an event handler in order to filter behavior on the basis

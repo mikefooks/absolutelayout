@@ -72,6 +72,12 @@ Layout.prototype = {
         return newCell;
     },
 
+    /**
+     * Modifies all the cell object's internal properties to reflect a
+     * change in the cell's size and, if the resize happens to project
+     * from the top (north) or left(west) of the cell, the position
+     * needs to be changed as well.
+     */
     resizeCell: function (id, bbox) {
         var cell = this.cells.filter(function (cell) {
                 return cell.id == id;
@@ -98,6 +104,50 @@ Layout.prototype = {
             cell.style.top = position.top;
             cell.style.width = dimensions.width;
             cell.style.height = dimensions.height;
+
+            for (i = 0; i < this.cells.length; i++) {
+                if (this.cells[i].id == id) {
+                    this.cells.splice(i, 1);
+                }
+            }
+
+            this.cells.push(cell);
+
+            return cell;
+        }
+    },
+
+    /**
+     * Changes the cell's and the layout's plot object to reflect a 
+     * change in the position of a cell.
+     */
+    moveCell: function (id, bbox) {
+        var cell = this.cells.filter(function (cell) {
+            return cell.id == id;
+        })[0],
+            left = this._findColumnByCoord(bbox.left),
+            top = this._findRowByCoord(bbox.top),
+            rowsCols = this._rowsAndColumns(cell.plots),
+            newPlots = this._getPlots(left, top, rowsCols.columns, rowsCols.rows),
+            plotSetData = this._intersectPlotKeys(cell.plots, newPlots),
+            isClear = this._checkPosition(plotSetData.entering),
+            position, i;
+
+        if (isClear) {
+            position = this._cellPosition(newPlots[0]);
+
+            plotSetData.exiting.forEach((function (key) {
+                this.plots[key].occupied = false;
+            }).bind(this));
+
+            plotSetData.entering.forEach((function (key) {
+                this.plots[key].occupied = true;
+            }).bind(this));
+
+            cell.plots = newPlots;
+
+            cell.style.left = position.left;
+            cell.style.top = position.top;
 
             for (i = 0; i < this.cells.length; i++) {
                 if (this.cells[i].id == id) {
@@ -200,14 +250,28 @@ Layout.prototype = {
      * Finds the dimensions in % given an array of plotKeys.
      */
     _cellDimensions: function (plotKeys) {
+        var dimensions = this._rowsAndColumns(plotKeys);
+
+        return {
+            width: ((100 / this.columns) * dimensions.columns) + '%',
+            height: ((100 / this.rows) * dimensions.rows) + '%'
+        };
+    },
+
+
+    /**
+     * Takes an array of plotKeys and returns the width and height in
+     * columns and rows of a cell occupying those plots.
+     */
+    _rowsAndColumns: function (plotKeys) {
         var leftTop = plotKeys[0].split("-"),
             rightBottom = plotKeys.slice(-1)[0].split("-"),
             columns = rightBottom[0] - leftTop[0] + 1,
             rows = rightBottom[1] - leftTop[1] + 1;
 
         return {
-            width: ((100 / this.columns) * columns) + '%',
-            height: ((100 / this.rows) * rows) + '%'
+            columns: columns,
+            rows: rows
         };
     },
 

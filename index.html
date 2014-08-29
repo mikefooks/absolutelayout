@@ -29,6 +29,11 @@
             outline: 1px dashed green;
         }
 
+        .mover {
+            position: absolute;
+            outline: 1px dashed purple;
+        }
+
         .testCell {
             outline: 1px red dashed;
             position: absolute;
@@ -37,7 +42,7 @@
         .resize_east {
             position: absolute;
             height: 80%;
-            width: 24px;
+            width: 10%;
             top: 10%;
             right: 0%;
             cursor: e-resize;
@@ -45,7 +50,7 @@
 
         .resize_south {
             position: absolute;
-            height: 24px;
+            height: 10%;
             width: 80%;
             bottom: 0%;
             left: 10%;
@@ -55,7 +60,7 @@
         .resize_west {
             position: absolute;
             height: 80%;
-            width: 24px;
+            width: 10%;
             top: 10%;
             left: 0%;
             cursor: w-resize;
@@ -63,11 +68,20 @@
 
         .resize_north {
             position: absolute;
-            height: 24px;
+            height: 10%;
             width: 80%;
             top: 0%;
             left: 10%;
             cursor: n-resize;
+        }
+
+        .move {
+            position: absolute;
+            height: 80%;
+            width: 80%;
+            top: 10%;
+            left: 10%;
+            cursor: move;
         }
     </style>
 </head>
