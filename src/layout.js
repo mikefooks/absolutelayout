@@ -132,14 +132,6 @@ Layout.prototype = {
             cell.style.width = dimensions.width;
             cell.style.height = dimensions.height;
 
-            for (i = 0; i < this.cells.length; i++) {
-                if (this.cells[i].id == cell.id) {
-                    this.cells.splice(i, 1);
-                }
-            }
-
-            this.cells.push(cell);
-
             return cell;
         }
     },
