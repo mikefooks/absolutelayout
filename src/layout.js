@@ -83,43 +83,14 @@ Layout.prototype = {
                 return cell.id == id;
             })[0],
             newPlots = this._findPlotsByBBox(bbox),
-            plotSetData = this._intersectPlotKeys(cell.plots, newPlots),
-            isClear = this._checkPosition(plotSetData.entering),
-            position, dimensions, i;
+            plotSetData = this._intersectPlotKeys(cell.plots, newPlots);
 
-        if (isClear) {
-            position = this._cellPosition(newPlots[0]);
-            dimensions = this._cellDimensions(newPlots);
-
-            plotSetData.exiting.forEach((function (key) {
-                this.plots[key].occupied = false;
-            }).bind(this));
-
-            plotSetData.entering.forEach((function (key) {
-                this.plots[key].occupied = true;
-            }).bind(this));
-
-            cell.plots = newPlots;
-            cell.style.left = position.left;
-            cell.style.top = position.top;
-            cell.style.width = dimensions.width;
-            cell.style.height = dimensions.height;
-
-            for (i = 0; i < this.cells.length; i++) {
-                if (this.cells[i].id == id) {
-                    this.cells.splice(i, 1);
-                }
-            }
-
-            this.cells.push(cell);
-
-            return cell;
-        }
+        return this._modifyCell(cell, newPlots, plotSetData);
     },
 
     /**
-     * Changes the cell's and the layout's plot object to reflect a 
-     * change in the position of a cell.
+     * Takes the information obtained from the UI and computes the plot
+     * parameters involved in moving a cell.
      */
     moveCell: function (id, bbox) {
         var cell = this.cells.filter(function (cell) {
@@ -129,28 +100,40 @@ Layout.prototype = {
             top = this._findRowByCoord(bbox.top),
             rowsCols = this._rowsAndColumns(cell.plots),
             newPlots = this._getPlots(left, top, rowsCols.columns, rowsCols.rows),
-            plotSetData = this._intersectPlotKeys(cell.plots, newPlots),
+            plotSetData = this._intersectPlotKeys(cell.plots, newPlots);
+
+        return this._modifyCell(cell, newPlots, plotSetData);
+    },
+
+    /**
+     * Takes the new plot data either from the resize or move method,
+     * checks whether the involved plots are occupied are not and, if not
+     * makes the necessary changes to the cell to reflect the resize or
+     * move action.
+     */
+    _modifyCell: function (cell, newPlots, plotSetData) {
+        var position = this._cellPosition(newPlots[0]),
+            dimensions = this._cellDimensions(newPlots),
             isClear = this._checkPosition(plotSetData.entering),
-            position, i;
+            i;
 
         if (isClear) {
-            position = this._cellPosition(newPlots[0]);
+            for (i = 0; i < plotSetData.exiting.length; i++) {
+                this.plots[plotSetData.exiting[i]].occupied = false;
+            }
 
-            plotSetData.exiting.forEach((function (key) {
-                this.plots[key].occupied = false;
-            }).bind(this));
-
-            plotSetData.entering.forEach((function (key) {
-                this.plots[key].occupied = true;
-            }).bind(this));
+            for (i = 0; i < plotSetData.entering.length; i++) {
+                this.plots[plotSetData.entering[i]].occupied = true;
+            }
 
             cell.plots = newPlots;
-
             cell.style.left = position.left;
             cell.style.top = position.top;
+            cell.style.width = dimensions.width;
+            cell.style.height = dimensions.height;
 
             for (i = 0; i < this.cells.length; i++) {
-                if (this.cells[i].id == id) {
+                if (this.cells[i].id == cell.id) {
                     this.cells.splice(i, 1);
                 }
             }
