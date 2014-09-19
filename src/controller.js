@@ -83,7 +83,8 @@ Controls.prototype = {
                     "resize_south",
                     "resize_west",
                     "resize_north",
-                    "move"
+                    "move",
+                    "delete"
                 ];
                 el = document.createElement("div");
 
@@ -270,10 +271,25 @@ Controls.prototype = {
         };
 
         /**
+         * Takes the event object, calls to the layout object to delete
+         * the cell's abstract attributes then, if successful, deletes the
+         * cell's visual representation from the layout.
+         */
+        var deleteCell = function (evt) {
+            var cellEl = evt.target.parentNode,
+                id = cellEl.dataset.id;
+
+            if (this.layout.deleteCell(id)) {
+                cellEl.parentElement.removeChild(cellEl);
+            }
+        };
+
+        /**
          * The mouse event handlers, which actually tie our functionality
          * to triggered mouse event.
          */
         var mouseDownHandler = function (evt) {
+            matchTarget(/^delete/, deleteCell).call(this, evt);
             matchTarget(/^layoutBox/, selectStart).call(this, evt);
             matchTarget(/^resize_([a-z]+)$/, resizeStart).call(this, evt);
             matchTarget(/^move$/, moveStart).call(this, evt);
@@ -299,8 +315,7 @@ Controls.prototype = {
 
             if (this.selectorDrag.isDragging) {
                 selectorBBox = getCellBoundingBox(this.selectorDrag.el);
-
-                createCell.call(this, selectorBBox);
+                createCell.call(this, selectorBBox);                  
                 selectEnd.call(this, evt);
             }
             if (this.resizeDrag.isDragging) {
@@ -323,7 +338,7 @@ Controls.prototype = {
 
         layout.el.addEventListener("mousedown", mouseDownHandler.bind(this), false);
         layout.el.addEventListener("mousemove", mouseMoveHandler.bind(this), false);
-        document.body.addEventListener("mouseup", mouseUpHandler.bind(this), false);
+        document.addEventListener("mouseup", mouseUpHandler.bind(this), false);
 
         /**
          * Decorates an event handler in order to filter behavior on the basis

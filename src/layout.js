@@ -3,6 +3,7 @@
 function Layout(columns, rows, container) {
     this.columns = columns;
     this.rows = rows;
+    this.containerClass = container;
     this.el = document.querySelector(container);
     this.cellClass = "testCell";
 }
@@ -103,6 +104,34 @@ Layout.prototype = {
             plotSetData = this._intersectPlotKeys(cell.plots, newPlots);
 
         return this._modifyCell(cell, newPlots, plotSetData);
+    },
+
+    /**
+     * Takes a cell id, resets the status of its plots to occupied = false,
+     * removes the cell from the layout's cells array, and returns true if
+     * the operation is successful.
+     */
+    deleteCell: function (id) {
+        var i = 0,
+            found = false;
+
+        while (!found) {
+            if (this.cells[i].id == id) {
+                found = true;
+                break;
+            }
+            i += 1;
+        }
+
+        if (found) {
+            this.cells[i].plots.forEach((function (plotKey) {
+                this.plots[plotKey].occupied = false;
+            }).bind(this));
+
+            this.cells.splice(i, 1);
+
+            return true;
+        }
     },
 
     /**
