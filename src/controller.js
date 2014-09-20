@@ -73,20 +73,25 @@ Controls.prototype = {
          */    
         var createCell = function (bbox) {
             var newCell = this.layout.addCell(bbox),
-                attrKeys, styleKeys, innerElClasses, el;
+                attrKeys, styleKeys, innerElClasses, el, renameInput;
 
             if (newCell) {
                 attrKeys = Object.keys(newCell.attrs);
                 styleKeys = Object.keys(newCell.style);
                 innerElClasses = [
+                    "move",
                     "resize_east",
                     "resize_south",
                     "resize_west",
                     "resize_north",
-                    "move",
-                    "delete"
+                    "delete",
+                    "rename"
                 ];
                 el = document.createElement("div");
+                renameInput = document.createElement("input");
+                renameInput.setAttribute("type", "text");
+                renameInput.setAttribute("class", "renameInput");
+                renameInput.setAttribute("id", "cell_" + newCell.id);
 
                 el.dataset.id = newCell.id;
 
@@ -101,6 +106,11 @@ Controls.prototype = {
                 innerElClasses.forEach(function (name) {
                     var controlEl = document.createElement("div");
                     controlEl.className = name;
+
+                    if (name == "rename") {
+                        controlEl.appendChild(renameInput);
+                    }
+
                     el.appendChild(controlEl);
                 });
 
@@ -285,14 +295,44 @@ Controls.prototype = {
         };
 
         /**
+         * deactivateRename and activateRename control the display of
+         * the text input used to rename the cell. The cell's name property
+         * will be used to produce css strings for the layout.
+         */
+        var deactivateRename = function (evt) {
+            var inputs = this.layout.el.querySelectorAll("input.renameInput");
+
+            this.isRenaming = false;
+
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].style.visibility = "hidden";
+            }
+        };
+
+        var activateRename = function (evt) {
+            var inputEl = evt.target.firstChild;
+
+            this.isRenaming = true;
+
+            if (inputEl && inputEl.className == "renameInput") {
+                inputEl.style.visibility = "visible";
+                inputEl.focus();               
+            }
+        };
+
+        /**
          * The mouse event handlers, which actually tie our functionality
          * to triggered mouse event.
          */
         var mouseDownHandler = function (evt) {
+            if (this.isRenaming) {
+                deactivateRename.call(this, evt);
+            }
             matchTarget(/^delete/, deleteCell).call(this, evt);
             matchTarget(/^layoutBox/, selectStart).call(this, evt);
             matchTarget(/^resize_([a-z]+)$/, resizeStart).call(this, evt);
             matchTarget(/^move$/, moveStart).call(this, evt);
+            matchTarget(/^rename/, activateRename).call(this, evt);
         };
 
         var mouseMoveHandler = function (evt) {

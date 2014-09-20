@@ -5,7 +5,7 @@ function Layout(columns, rows, container) {
     this.rows = rows;
     this.containerClass = container;
     this.el = document.querySelector(container);
-    this.cellClass = "testCell";
+    this.cellClass = "cell";
 }
 
 Layout.prototype = {
@@ -115,12 +115,11 @@ Layout.prototype = {
         var i = 0,
             found = false;
 
-        while (!found) {
+        for (i = 0; i < this.cells.length; i++) {
             if (this.cells[i].id == id) {
                 found = true;
                 break;
             }
-            i += 1;
         }
 
         if (found) {
