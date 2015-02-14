@@ -2,7 +2,6 @@ var Layout = (function (w, d, undefined) {
     "use strict";
 
     var layoutProto = {
-        constructor: Layout,
 
         /**
          * Creates all the necessary plots, based on the 
